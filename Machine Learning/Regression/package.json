@@ -1,0 +1,16 @@
+{
+  "name": "simple-linear-regression",
+  "version": "1.0.0",
+  "description": "",
+  "main": "simple_linear_regression.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "papaparse": "^5.5.3"
+  }
+}
