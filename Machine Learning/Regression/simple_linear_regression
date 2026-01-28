@@ -1,0 +1,314 @@
+● The file is displayed above — 138 lines, using PapaParse as the CSV parser with mainWithPapaParse() as the entry
+  point.
+
+> i want this code in typescript
+  "C:\Users\SriniAchuthan\OneDrive\Desktop\Machine-Learning-A-Z-Codes-Datasets\Machine Learning A-Z\Part 2 -
+  Regression\Section 4 - Simple Linear Regression\Python\simple_linear_regression.py"
+
+● Let me read the Python file first.
+
+● Read 1 file (ctrl+o to expand)
+
+● Let me check the project structure and the CSV data file.
+
+● Read 2 files (ctrl+o to expand)
+
+● Good, I have the full picture. The Python script reads salary data, splits train/test, fits a simple linear
+  regression, predicts, and plots. I'll convert this to TypeScript with PapaParse for CSV and a from-scratch linear
+  regression implementation (no sklearn equivalent in TS). Visualization will be console output since there's no
+  matplotlib in Node.
+
+● Bash(mkdir "C:\Users\SriniAchuthan\OneDrive\Desktop\Typescript Machine Learning\Simple Linear Regression")
+  ⎿  (No content)
+
+● Write(~\OneDrive\Desktop\Typescript Machine Learning\Simple Linear Regression\package.json)
+  ⎿  Wrote 1 lines to ..\..\OneDrive\Desktop\Typescript Machine Learning\Simple Linear Regression\package.json
+       1 {
+       2   "name": "simple-linear-regression",
+       3   "version": "1.0.0",
+       4   "description": "",
+       5   "main": "simple_linear_regression.js",
+       6   "scripts": {
+       7     "test": "echo \"Error: no test specified\" && exit 1"
+       8   },
+       9   "keywords": [],
+      10   "author": "",
+
+● Write(~\OneDrive\Desktop\Typescript Machine Learning\Simple Linear Regression\simple_linear_regression.ts)
+  ⎿  Wrote 1 lines to ..\..\OneDrive\Desktop\Typescript Machine Learning\Simple Linear
+     Regression\simple_linear_regression.ts
+       1 // Simple Linear Regression
+       2
+       3 // Importing the libraries
+       4 import * as fs from 'fs';
+       5 import * as Papa from 'papaparse';
+       6
+       7 // Importing the dataset
+       8 const csvFile = fs.readFileSync('C:\\Users\\SriniAchuthan\\OneDrive\\Desktop\\Machine-Learning-A-Z-Codes
+         -Datasets\\Machine Learning A-Z\\Part 2 - Regression\\Section 4 - Simple Linear Regression\\Python\\Sala
+         ry_Data.csv', 'utf8');
+       9
+      10 const parsed = Papa.parse(csvFile, {
+
+● Now let me install dependencies, compile, and run.
+
+● Bash(cd "C:\Users\SriniAchuthan\OneDrive\Desktop\Typescript Machine Learning\Simple Linear Regression"    timeout: 1m
+      && npm install papaparse)                                                                             0s
+  ⎿  added 1 package, and audited 2 packages in 1s
+
+     found 0 vulnerabilities
+
+● Bash(cd "C:\Users\SriniAchuthan\OneDrive\Desktop\Typescript Machine Learning\Simple Linear Regression"   timeout: 1m
+      && npx tsc simple_linear_regression.ts 2>&1)                                                         0s
+  ⎿  Error: Exit code 2
+     simple_linear_regression.ts(29,23): error TS2449: Class 'SimpleLinearRegression' used before its declaration.
+
+● The class is used before its declaration. I need to move the class and utility functions above the main code.
+
+● Read 1 file (ctrl+o to expand)
+
+● I'll restructure the file — move all class/function definitions above the main logic by wrapping the main logic in a
+  function.
+
+● Write(~\OneDrive\Desktop\Typescript Machine Learning\Simple Linear Regression\simple_linear_regression.ts)
+  ⎿  Added 60 lines, removed 52 lines
+       4  import * as fs from 'fs';
+       5  import * as Papa from 'papaparse';
+       6
+       7 -// Importing the dataset
+       8 -const csvFile = fs.readFileSync('C:\\Users\\SriniAchuthan\\OneDrive\\Desktop\\Machine-Learning-A-Z-Code
+         -s-Datasets\\Machine Learning A-Z\\Part 2 - Regression\\Section 4 - Simple Linear Regression\\Python\\Sa
+         -lary_Data.csv', 'utf8');
+       9 -
+      10 -const parsed = Papa.parse(csvFile, {
+      11 -    header: true,
+      12 -    dynamicTyping: true,
+      13 -    skipEmptyLines: true
+      14 -});
+      15 -
+      16 -const dataset = parsed.data as any[];
+      17 -const columns = Object.keys(dataset[0]);
+      18 -
+      19 -// X = all columns except last (2D array), y = last column (1D array)
+      20 -const X: number[][] = dataset.map(row =>
+      21 -    columns.slice(0, -1).map(col => row[col])
+      22 -);
+      23 -const y: number[] = dataset.map(row => row[columns[columns.length - 1]]);
+      24 -
+      25 -// Splitting the dataset into the Training set and Test set
+      26 -const { X_train, X_test, y_train, y_test } = trainTestSplit(X, y, 1 / 3, 0);
+      27 -
+      28 -// Training the Simple Linear Regression model on the Training set
+      29 -const regressor = new SimpleLinearRegression();
+      30 -regressor.fit(X_train.map(row => row[0]), y_train);
+      31 -
+      32 -// Predicting the Test set results
+      33 -const y_pred = regressor.predict(X_test.map(row => row[0]));
+      34 -
+      35 -// Output results
+      36 -console.log('=== Simple Linear Regression ===\n');
+      37 -console.log(`Coefficient (slope): ${regressor.slope!.toFixed(4)}`);
+      38 -console.log(`Intercept: ${regressor.intercept!.toFixed(4)}\n`);
+      39 -
+      40 -console.log('--- Training set ---');
+      41 -console.log(`X_train size: ${X_train.length}`);
+      42 -console.log(`y_train size: ${y_train.length}\n`);
+      43 -
+      44 -console.log('--- Test set results ---');
+      45 -console.log(`X_test size: ${X_test.length}`);
+      46 -console.log(`y_test size: ${y_test.length}\n`);
+      47 -
+      48 -console.log('Predictions vs Actual:');
+      49 -console.log('Years Exp | Predicted Salary | Actual Salary');
+      50 -console.log('-'.repeat(50));
+      51 -for (let i = 0; i < X_test.length; i++) {
+      52 -    console.log(
+      53 -        `${X_test[i][0].toFixed(1).padStart(9)} | ` +
+      54 -        `${y_pred[i].toFixed(2).padStart(16)} | ` +
+      55 -        `${y_test[i].toFixed(2).padStart(13)}`
+      56 -    );
+      57 -}
+      58 -
+       7  // ============================================
+       8  // Simple Linear Regression class
+       9  // ============================================
+     ...
+       90      }
+       91      return arr;
+       92  }
+       93 +
+       94 +// ============================================
+       95 +// Main
+       96 +// ============================================
+       97 +
+       98 +function main() {
+       99 +    // Importing the dataset
+      100 +    const csvFile = fs.readFileSync('C:\\Users\\SriniAchuthan\\OneDrive\\Desktop\\Machine-Learning-A-Z
+          +-Codes-Datasets\\Machine Learning A-Z\\Part 2 - Regression\\Section 4 - Simple Linear Regression\\Pyth
+          +on\\Salary_Data.csv', 'utf8');
+      101 +
+      102 +    const parsed = Papa.parse(csvFile, {
+      103 +        header: true,
+      104 +        dynamicTyping: true,
+      105 +        skipEmptyLines: true
+      106 +    });
+      107 +
+      108 +    const dataset = parsed.data as any[];
+      109 +    const columns = Object.keys(dataset[0]);
+      110 +
+      111 +    // X = all columns except last (2D array), y = last column (1D array)
+      112 +    const X: number[][] = dataset.map(row =>
+      113 +        columns.slice(0, -1).map(col => row[col])
+      114 +    );
+      115 +    const y: number[] = dataset.map(row => row[columns[columns.length - 1]]);
+      116 +
+      117 +    // Splitting the dataset into the Training set and Test set
+      118 +    const { X_train, X_test, y_train, y_test } = trainTestSplit(X, y, 1 / 3, 0);
+      119 +
+      120 +    // Training the Simple Linear Regression model on the Training set
+      121 +    const regressor = new SimpleLinearRegression();
+      122 +    regressor.fit(X_train.map(row => row[0]), y_train);
+      123 +
+      124 +    // Predicting the Test set results
+      125 +    const y_pred = regressor.predict(X_test.map(row => row[0]));
+      126 +
+      127 +    // Output results
+      128 +    console.log('=== Simple Linear Regression ===\n');
+      129 +    console.log(`Coefficient (slope): ${regressor.slope!.toFixed(4)}`);
+      130 +    console.log(`Intercept: ${regressor.intercept!.toFixed(4)}\n`);
+      131 +
+      132 +    console.log('--- Training set ---');
+      133 +    console.log(`X_train size: ${X_train.length}`);
+      134 +    console.log(`y_train size: ${y_train.length}\n`);
+      135 +
+      136 +    console.log('--- Test set results ---');
+      137 +    console.log(`X_test size: ${X_test.length}`);
+      138 +    console.log(`y_test size: ${y_test.length}\n`);
+      139 +
+      140 +    console.log('Predictions vs Actual:');
+      141 +    console.log('Years Exp | Predicted Salary | Actual Salary');
+      142 +    console.log('-'.repeat(50));
+      143 +    for (let i = 0; i < X_test.length; i++) {
+      144 +        console.log(
+      145 +            `${X_test[i][0].toFixed(1).padStart(9)} | ` +
+      146 +            `${y_pred[i].toFixed(2).padStart(16)} | ` +
+      147 +            `${y_test[i].toFixed(2).padStart(13)}`
+      148 +        );
+      149 +    }
+      150 +}
+      151 +
+      152 +main();
+
+● Now compile and run.
+
+● Bash(cd "C:\Users\SriniAchuthan\OneDrive\Desktop\Typescript Machine Learning\Simple Linear Regression"   timeout: 1m
+      && npx tsc simple_linear_regression.ts 2>&1)                                                         0s
+  ⎿  (No content)
+
+● Bash(cd "C:\Users\SriniAchuthan\OneDrive\Desktop\Typescript Machine Learning\Simple Linear Regression" &&  timeout:
+      node simple_linear_regression.js)                                                                      30s
+
+  ⎿  === Simple Linear Regression ===
+
+     Coefficient (slope): 9352.8562
+     … +23 lines (ctrl+o to expand)
+
+● It compiles and runs successfully. Here's a summary of what was created:
+
+  simple_linear_regression.ts — TypeScript port of the Python script:
+  ┌────────────────────────────┬─────────────────────────────────────────────────────────────────────────────┐
+  │           Python           │                                 TypeScript                                  │
+  ├────────────────────────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ pandas.read_csv()          │ papaparse + fs.readFileSync()                                               │
+  ├────────────────────────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ sklearn.train_test_split() │ Custom trainTestSplit() with seeded shuffle                                 │
+  ├────────────────────────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ sklearn.LinearRegression   │ Custom SimpleLinearRegression class (OLS: slope = Σ(xi-x̄)(yi-ȳ) / Σ(xi-x̄)²) │
+  ├────────────────────────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ matplotlib plots           │ Console table of predictions vs actuals                                     │
+  └────────────────────────────┴─────────────────────────────────────────────────────────────────────────────┘
+  Results:
+  - Slope: 9352.86 (salary increases ~$9,353 per year of experience)
+  - Intercept: 27445.86 (base salary at 0 years)
+  - Split: 20 training / 10 test samples (1/3 test size)
+  - Predictions track actual values closely (e.g., 7.9 years → predicted $101,333 vs actual $101,302)
+
+✻ Baked for 2m 38s
+
+> Read C:\Users\SriniAchuthan\OneDrive\Desktop\Typescript Machine
+  Learning\Preprocessing\simple_linear_regression.ts
+
+● Read 1 file (ctrl+o to expand)
+
+● That file doesn't exist in the Preprocessing directory. The simple_linear_regression.ts file was created in a separate
+   directory:
+
+  C:\Users\SriniAchuthan\OneDrive\Desktop\Typescript Machine Learning\Simple Linear
+  Regression\simple_linear_regression.ts
+
+  Would you like me to read it from that path instead?
+
+> Read C:\Users\SriniAchuthan\OneDrive\Desktop\Typescript Machine Learning\Simple Linear
+  Regression\simple_linear_regression.ts
+
+● Read 1 file (ctrl+o to expand)
+
+● There's the file — 153 lines. It contains the SimpleLinearRegression class, trainTestSplit utility, and a main()
+  function that reads Salary_Data.csv, fits the model, and prints predictions vs actuals.
+
+  What would you like to do with this file? I'm currently in plan mode — if you have a task in mind, let me know and
+  I'll plan it out.
+
+> i want to plan the output
+
+● Let me read the existing plan file first, then clarify what you're looking for.
+
+● Read 1 file (ctrl+o to expand)
+
+● The existing plan is from the previous preprocessing task (already completed). This is a new task about the output of
+  simple_linear_regression.ts.
+
+  Currently, the script outputs:
+  === Simple Linear Regression ===
+
+  Coefficient (slope): 9352.8562
+  Intercept: 27445.8550
+
+  --- Training set ---
+  X_train size: 20
+  y_train size: 20
+
+  --- Test set results ---
+  X_test size: 10
+  y_test size: 10
+
+  Predictions vs Actual:
+  Years Exp | Predicted Salary | Actual Salary
+  --------------------------------------------------
+        4.0 |         64857.28 |      56957.00
+        ...  (10 rows)
+
+  Let me clarify what you'd like.
+
+● User declined to answer questions
+
+> print all the 10 rows
+
+● The script already prints all 10 test set rows. When we ran it earlier, the full output was:
+
+  Predictions vs Actual:
+  Years Exp | Predicted Salary | Actual Salary
+  --------------------------------------------------
+        4.0 |         64857.28 |      56957.00
+        4.0 |         64857.28 |      55794.00
+        4.5 |         69533.71 |      61111.00
+       10.3 |        123780.27 |     122391.00
+        4.9 |         73274.85 |      67938.00
+        3.7 |         62051.42 |      57189.00
+        5.9 |         82627.71 |      81363.00
+        7.9 |        101333.42 |     101302.00
+        3.2 |         57374.99 |      64445.00
+        3.2 |         57374.99 |      54445.00
+
+  All 10 rows are already there. Is there something else you'd like changed about the output — for example, also
+  printing the 20 training rows, adding metrics like R², or changing the format?
