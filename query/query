@@ -1349,19 +1349,7 @@
   adnair
   sk-ant-api03-jp6...TwAA
 
-● Important: Don't share API keys in chat - they're sensitive credentials.
 
-  To use it safely, set it as an environment variable yourself:
-
-  PowerShell:
-  $env:ANTHROPIC_API_KEY="sk-ant-api03-jp6...TwAA"
-  npx tsx src/agent.ts
-
-  Or Git Bash:
-  export ANTHROPIC_API_KEY="sk-ant-api03-jp6...TwAA"
-  npx tsx src/agent.ts
-
-  Replace sk-ant-api03-jp6...TwAA with your full key.
 
   Also, consider regenerating this key at https://console.anthropic.com/api-keys since it was partially exposed here.
 
