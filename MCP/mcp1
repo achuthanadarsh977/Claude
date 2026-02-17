@@ -1,0 +1,1493 @@
+
+● Read 1 file (ctrl+o to expand)
+
+● The file was reformatted. Let me write the full updated file with the mock engine replacing the API calls.
+
+● Write(C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator/src/App.jsx)
+  ⎿  Added 175 lines, removed 45 lines
+       95    return { error: "Unknown tool" };
+       96  }
+       97
+       98 +// ─── Mock Claude LLM Engine (no API needed) ──────────────────────────────────
+       99 +let toolIdCounter = 0;
+      100 +
+      101 +function mockClaudeDecision(userText) {
+      102 +  const text = userText.toLowerCase();
+      103 +  const toolCalls = [];
+      104 +
+      105 +  // Detect calculator intent
+      106 +  const mathPatterns = [
+      107 +    { regex: /(\d+(?:\.\d+)?)\s*\+\s*(\d+(?:\.\d+)?)/, op: "add" },
+      108 +    { regex: /(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/, op: "subtract" },
+      109 +    { regex: /(\d+(?:\.\d+)?)\s*[×*x]\s*(\d+(?:\.\d+)?)/i, op: "multiply" },
+      110 +    { regex: /(\d+(?:\.\d+)?)\s*[÷/]\s*(\d+(?:\.\d+)?)/, op: "divide" },
+      111 +  ];
+      112 +
+      113 +  const wordPatterns = [
+      114 +    { regex: /(\d+(?:\.\d+)?)\s+plus\s+(\d+(?:\.\d+)?)/i, op: "add" },
+      115 +    { regex: /(\d+(?:\.\d+)?)\s+minus\s+(\d+(?:\.\d+)?)/i, op: "subtract" },
+      116 +    { regex: /(\d+(?:\.\d+)?)\s+(?:times|multiplied\s+by)\s+(\d+(?:\.\d+)?)/i, op: "multiply" },
+      117 +    { regex: /(\d+(?:\.\d+)?)\s+(?:divided\s+by|over)\s+(\d+(?:\.\d+)?)/i, op: "divide" },
+      118 +  ];
+      119 +
+      120 +  const allMathPatterns = [...mathPatterns, ...wordPatterns];
+      121 +
+      122 +  for (const { regex, op } of allMathPatterns) {
+      123 +    const m = userText.match(regex);
+      124 +    if (m) {
+      125 +      const a = parseFloat(m[1]);
+      126 +      const b = parseFloat(m[2]);
+      127 +      if (!isNaN(a) && !isNaN(b)) {
+      128 +        toolCalls.push({
+      129 +          type: "tool_use",
+      130 +          id: `toolu_mock_${++toolIdCounter}`,
+      131 +          name: "calculator",
+      132 +          input: { operation: op, a, b },
+      133 +        });
+      134 +      }
+      135 +    }
+      136 +  }
+      137 +
+      138 +  // Detect weather intent
+      139 +  const weatherMatch = text.match(/weather\s+(?:in|for|at)\s+([a-z\s]+)/);
+      140 +  if (weatherMatch) {
+      141 +    const city = weatherMatch[1].trim().replace(/[?.!,]+$/, "");
+      142 +    toolCalls.push({
+      143 +      type: "tool_use",
+      144 +      id: `toolu_mock_${++toolIdCounter}`,
+      145 +      name: "get_weather",
+      146 +      input: { city: city.charAt(0).toUpperCase() + city.slice(1) },
+      147 +    });
+      148 +  }
+      149 +
+      150 +  // Detect notes intent
+      151 +  if (text.match(/save\s+(a\s+)?note/)) {
+      152 +    const keyMatch = userText.match(/(?:called|named|key)\s+['"]([^'"]+)['"]/i);
+      153 +    const contentMatch = userText.match(/(?:content|with|saying)\s+['"]([^'"]+)['"]/i);
+      154 +    toolCalls.push({
+      155 +      type: "tool_use",
+      156 +      id: `toolu_mock_${++toolIdCounter}`,
+      157 +      name: "notes",
+      158 +      input: {
+      159 +        action: "save",
+      160 +        key: keyMatch?.[1] || "untitled",
+      161 +        content: contentMatch?.[1] || "empty",
+      162 +      },
+      163 +    });
+      164 +  } else if (text.match(/list\s+(my\s+)?notes/) || text.match(/show\s+(my\s+)?notes/)) {
+      165 +    toolCalls.push({
+      166 +      type: "tool_use",
+      167 +      id: `toolu_mock_${++toolIdCounter}`,
+      168 +      name: "notes",
+      169 +      input: { action: "list" },
+      170 +    });
+      171 +  } else if (text.match(/get\s+(my\s+)?note/)) {
+      172 +    const keyMatch = userText.match(/(?:called|named|key)\s+['"]([^'"]+)['"]/i);
+      173 +    toolCalls.push({
+      174 +      type: "tool_use",
+      175 +      id: `toolu_mock_${++toolIdCounter}`,
+      176 +      name: "notes",
+      177 +      input: { action: "get", key: keyMatch?.[1] || "untitled" },
+      178 +    });
+      179 +  }
+      180 +
+      181 +  if (toolCalls.length > 0) {
+      182 +    return {
+      183 +      id: `msg_mock_${Date.now()}`,
+      184 +      type: "message",
+      185 +      role: "assistant",
+      186 +      model: "claude-sonnet-4-20250514 (simulated)",
+      187 +      stop_reason: "tool_use",
+      188 +      content: [
+      189 +        { type: "text", text: "I'll use the available tools to help you with that." },
+      190 +        ...toolCalls,
+      191 +      ],
+      192 +    };
+      193 +  }
+      194 +
+      195 +  return {
+      196 +    id: `msg_mock_${Date.now()}`,
+      197 +    type: "message",
+      198 +    role: "assistant",
+      199 +    model: "claude-sonnet-4-20250514 (simulated)",
+      200 +    stop_reason: "end_turn",
+      201 +    content: [
+      202 +      {
+      203 +        type: "text",
+      204 +        text: `I'd be happy to help! Try asking me to:\n\n• Calculate something (e.g. "What is 25 × 4?
+          +")\n• Check weather (e.g. "Weather in Tokyo")\n• Save/list notes (e.g. "Save a note called 'idea' with
+          + content 'hello'")`,
+      205 +      },
+      206 +    ],
+      207 +  };
+      208 +}
+      209 +
+      210 +function mockClaudeFinalResponse(toolResults) {
+      211 +  const parts = [];
+      212 +  for (const tr of toolResults) {
+      213 +    const data = JSON.parse(tr.content);
+      214 +    if (data.expression) {
+      215 +      parts.push(`The result of ${data.expression}.`);
+      216 +    } else if (data.city) {
+      217 +      parts.push(
+      218 +        `The weather in ${data.city}: ${data.temp}, ${data.condition}, humidity ${data.humidity}.`
+      219 +      );
+      220 +    } else if (data.success) {
+      221 +      parts.push(data.message);
+      222 +    } else if (data.keys) {
+      223 +      parts.push(
+      224 +        data.keys.length > 0
+      225 +          ? `Your saved notes: ${data.keys.join(", ")}`
+      226 +          : "You have no saved notes yet."
+      227 +      );
+      228 +    } else if (data.key && data.content !== undefined) {
+      229 +      parts.push(
+      230 +        data.content
+      231 +          ? `Note "${data.key}": ${data.content}`
+      232 +          : `Note "${data.key}" was not found.`
+      233 +      );
+      234 +    }
+      235 +  }
+      236 +  return {
+      237 +    id: `msg_mock_${Date.now()}`,
+      238 +    type: "message",
+      239 +    role: "assistant",
+      240 +    model: "claude-sonnet-4-20250514 (simulated)",
+      241 +    stop_reason: "end_turn",
+      242 +    content: [{ type: "text", text: parts.join("\n\n") || "Done!" }],
+      243 +  };
+      244 +}
+      245 +
+      246  // ─── Protocol Log Entry ───────────────────────────────────────────────────────
+      247  function ProtocolEntry({ entry, index }) {
+      248    const [open, setOpen] = useState(false);
+     ...
+      263        bg: "#2a1040",
+      264        border: "#5c1a80",
+      265        badge: "#9333ea",
+      118 -      label: "CLAUDE API",
+      266 +      label: "CLAUDE (SIMULATED)",
+      267      },
+      268      tool: {
+      269        bg: "#2a1f00",
+     ...
+      399    const [log, setLog] = useState([]);
+      400    const [input, setInput] = useState("");
+      401    const [loading, setLoading] = useState(false);
+      254 -  const [phase, setPhase] = useState("idle"); // idle | discovering | calling | executing | responding
+      402 +  const [phase, setPhase] = useState("idle");
+      403    const logRef = useRef(null);
+      404    const inputRef = useRef(null);
+      405
+     ...
+      455
+      456      await delay(300);
+      457
+      310 -    // Step 2: Send to Claude with tools
+      458 +    // Step 2: Send to Claude (simulated — no API key needed)
+      459      setPhase("calling");
+      460      addLog({
+      461        type: "claude",
+      314 -      summary: "POST /v1/messages — sending tools + conversation to Claude",
+      462 +      summary: "Sending tools + conversation to Claude (simulated)",
+      463        payload: {
+      316 -        model: "claude-sonnet-4-20250514",
+      464 +        model: "claude-sonnet-4-20250514 (simulated)",
+      465          tools: MCP_TOOLS,
+      466          messages: newMessages,
+      467          max_tokens: 1000,
+      468        },
+      469      });
+      470
+      471 +    await delay(500);
+      472 +
+      473      try {
+      324 -      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      325 -        method: "POST",
+      326 -        headers: { "Content-Type": "application/json" },
+      327 -        body: JSON.stringify({
+      328 -          model: "claude-sonnet-4-20250514",
+      329 -          max_tokens: 1000,
+      330 -          tools: MCP_TOOLS,
+      331 -          messages: newMessages,
+      332 -        }),
+      333 -      });
+      474 +      // Mock Claude decides which tools to call
+      475 +      const data = mockClaudeDecision(userText);
+      476
+      335 -      const data = await response.json();
+      336 -
+      477        addLog({
+      478          type: "claude",
+      479          summary: `Claude responded — stop_reason: ${data.stop_reason}`,
+     ...
+      486
+      487        while (currentData.stop_reason === "tool_use") {
+      488          const toolUseBlocks = currentData.content.filter(
+      349 -          (b) => b.type === "tool_use",
+      489 +          (b) => b.type === "tool_use"
+      490          );
+      491          const assistantMsg = {
+      492            role: "assistant",
+     ...
+      540            await delay(200);
+      541          }
+      542
+      403 -        // Send results back to Claude
+      543 +        // Send tool results back to Claude (simulated)
+      544          setPhase("calling");
+      545          const userToolResultMsg = { role: "user", content: toolResults };
+      546          currentMessages = [...currentMessages, userToolResultMsg];
+      547
+      548          addLog({
+      549            type: "claude",
+      410 -          summary: "POST /v1/messages — sending tool results back to Claude",
+      550 +          summary: "Sending tool results back to Claude (simulated)",
+      551            payload: {
+      412 -            model: "claude-sonnet-4-20250514",
+      552 +            model: "claude-sonnet-4-20250514 (simulated)",
+      553              messages: currentMessages,
+      554              max_tokens: 1000,
+      555            },
+      556          });
+      557
+      418 -        const nextResponse = await fetch(
+      419 -          "https://api.anthropic.com/v1/messages",
+      420 -          {
+      421 -            method: "POST",
+      422 -            headers: { "Content-Type": "application/json" },
+      423 -            body: JSON.stringify({
+      424 -              model: "claude-sonnet-4-20250514",
+      425 -              max_tokens: 1000,
+      426 -              tools: MCP_TOOLS,
+      427 -              messages: currentMessages,
+      428 -            }),
+      429 -          },
+      430 -        );
+      558 +        await delay(400);
+      559
+      432 -        currentData = await nextResponse.json();
+      560 +        // Mock Claude generates final response from tool results
+      561 +        currentData = mockClaudeFinalResponse(toolResults);
+      562
+      563          addLog({
+      564            type: "claude",
+     ...
+      576
+      577        addLog({
+      578          type: "result",
+      450 -        summary: `Final answer delivered to user`,
+      579 +        summary: "Final answer delivered to user",
+      580          payload: { text: finalText },
+      581        });
+      582
+     ...
+      602
+      603    const phaseLabel = {
+      604      idle: null,
+      476 -    discovering: "🔍 Discovering tools from MCP server…",
+      477 -    calling: "🤖 Calling Claude API with tools…",
+      478 -    executing: "⚙️ Executing tool on MCP server…",
+      479 -    responding: "✅ Delivering final response…",
+      605 +    discovering: "Discovering tools from MCP server…",
+      606 +    calling: "Claude is analyzing with tools (simulated)…",
+      607 +    executing: "Executing tool on MCP server…",
+      608 +    responding: "Delivering final response…",
+      609    };
+      610
+      611    const chatMessages = messages.filter(
+      612      (m) =>
+      613        m.role === "user" ||
+      485 -      (m.role === "assistant" && typeof m.content === "string"),
+      614 +      (m.role === "assistant" && typeof m.content === "string")
+      615    );
+      616
+      617    return (
+     ...
+      689                letterSpacing: "0.08em",
+      690              }}
+      691            >
+      563 -            MODEL CONTEXT PROTOCOL · LIVE PROTOCOL INSPECTOR
+      692 +            MODEL CONTEXT PROTOCOL · LIVE PROTOCOL INSPECTOR · NO API REQUIRED
+      693            </div>
+      694          </div>
+      695          <div
+     ...
+      710              }}
+      711            />
+      712            <span style={{ fontSize: "11px", color: "#22c55e" }}>
+      584 -            SERVER CONNECTED
+      713 +            SERVER CONNECTED (LOCAL)
+      714            </span>
+      715          </div>
+      716        </div>
+     ...
+      1004              {[
+      1005                { color: "#2563eb", label: "Client → Server" },
+      1006                { color: "#16a34a", label: "Server → Client" },
+       878 -              { color: "#9333ea", label: "Claude API" },
+      1007 +              { color: "#9333ea", label: "Claude (Simulated)" },
+      1008                { color: "#d97706", label: "Tool Exec" },
+      1009                { color: "#e11d48", label: "Final Result" },
+      1010              ].map(({ color, label }) => (
+     ...
+      1079              >
+      1080                <span style={{ color: "#1e4080" }}>YOUR APP</span> → discover
+      1081                tools from <span style={{ color: "#1a5c2a" }}>MCP SERVER</span> →
+       953 -              pass tools to <span style={{ color: "#5c1a80" }}>CLAUDE</span> →
+      1082 +              pass tools to{" "}
+      1083 +              <span style={{ color: "#5c1a80" }}>CLAUDE (SIMULATED)</span> →
+      1084                execute tool calls →{" "}
+      1085                <span style={{ color: "#5c1a80" }}>CLAUDE</span> synthesizes final
+      1086                answer
+
+● Now let me start the app.
+
+● Bash(cd "C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator" && npm start)
+  ⎿  Running in the background (↓ to manage)
+
+● Task Output b6b78bb
+  ⎿  
+     > mcp-simulator@0.1.0 start
+     > react-scripts start
+     … +4 lines (ctrl+o to expand)
+
+● Port 3000 is already in use. Let me start it on a different port.
+
+● Bash(cd "C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator" && PORT=3001 npm start)
+  ⎿  Running in the background (↓ to manage)
+
+● Task Output b155ffc
+  ⎿  
+     > mcp-simulator@0.1.0 start
+     > react-scripts start
+     … +20 lines (ctrl+o to expand)
+
+● Your MCP Simulator is running at http://localhost:3001
+
+  What changed
+
+  I replaced all real Anthropic API calls with a local mock Claude engine that:
+
+  - Parses your message to detect intent (math, weather, notes)
+  - Returns mock Claude API responses in the exact same format (tool_use, stop_reason, etc.)
+  - Executes tools locally against the mock MCP server
+  - Generates a final response by synthesizing tool results
+
+  Try these queries
+
+  - What is 1337 × 42? — triggers the calculator tool
+  - What's the weather in Tokyo? — triggers the weather tool
+  - Save a note called 'idea' with content 'Build MCP server next' — triggers the notes tool
+  - What's 100 divided by 4, and what's the weather in Paris? — triggers multiple tools at once
+  - List my notes — lists saved notes
+
+  The entire MCP protocol flow (tool discovery, Claude decision, tool execution, result synthesis) is visible in the
+  Protocol Inspector panel on the right. No API key needed.
+
+✻ Cogitated for 4m 2s
+
+● Background command "Start the React dev server" completed (exit code 0)
+
+● The app is already running successfully on http://localhost:3001. The earlier port 3000 attempt just exited because
+  that port was busy — the second instance on 3001 compiled and is serving fine. Go ahead and open it in your browser!
+
+> Uncaught runtime errors:
+  ×
+  ERROR
+  Objects are not valid as a React child (found: object with keys {type, tool_use_id, content}). If you meant to
+  render a collection of children, use an array instead.
+      at throwOnInvalidObjectTypeImpl (http://localhost:3001/static/js/bundle.js:6025:11)
+      at throwOnInvalidObjectType (http://localhost:3001/static/js/bundle.js:6029:106)
+      at createChild (http://localhost:3001/static/js/bundle.js:6130:9)
+      at reconcileChildrenArray (http://localhost:3001/static/js/bundle.js:6230:66)
+      at reconcileChildFibersImpl (http://localhost:3001/static/js/bundle.js:6337:109)
+      at http://localhost:3001/static/js/bundle.js:6364:31
+      at reconcileChildren (http://localhost:3001/static/js/bundle.js:7923:47)
+      at beginWork (http://localhost:3001/static/js/bundle.js:8739:1565)
+      at runWithFiberInDEV (http://localhost:3001/static/js/bundle.js:3191:68)
+      at performUnitOfWork (http://localhost:3001/static/js/bundle.js:11100:93)
+
+● The issue is that tool result messages (with object content) are being rendered as chat messages. The filter needs to
+  exclude them.
+
+● Update(C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator/src/App.jsx)
+  ⎿  Added 1 line, removed 1 line
+      624
+      625    const chatMessages = messages.filter(
+      626      (m) =>
+      627 -      m.role === "user" ||
+      627 +      (m.role === "user" && typeof m.content === "string") ||
+      628        (m.role === "assistant" && typeof m.content === "string"),
+      629    );
+      630
+
+● Fixed. The problem was that tool_result messages (where content is an array of objects, not a string) were passing the
+   filter and React can't render objects as children. Now both user and assistant messages are only shown in chat when
+  their content is a string.
+
+  The app should auto-reload — try it again.
+
+> give description on the mcp tools
+
+● Here's what each MCP tool in the simulator does:
+
+  ---
+  1. Calculator (calculator)
+
+  - Purpose: Performs basic arithmetic operations
+  - Operations: add, subtract, multiply, divide
+  - Input: Two numbers (a, b) and an operation
+  - Example queries:
+    - "What is 1337 × 42?"
+    - "100 divided by 4"
+    - "25 + 75"
+
+  2. Weather (get_weather)
+
+  - Purpose: Returns current weather data for a given city
+  - Input: A city name (string)
+  - Built-in cities: London, Tokyo, New York, Paris, Sydney (any other city returns default data)
+  - Returns: Temperature, condition, and humidity
+  - Example queries:
+    - "What's the weather in Tokyo?"
+    - "Weather in Paris"
+
+  3. Notes (notes)
+
+  - Purpose: A simple key-value note storage system
+  - Actions:
+    - save — Stores a note with a key and content
+    - get — Retrieves a note by its key
+    - list — Lists all saved note keys
+  - Input: action (required), key and content (depending on action)
+  - Example queries:
+    - "Save a note called 'idea' with content 'Build MCP server next'"
+    - "List my notes"
+    - "Get my note called 'idea'"
+
+  ---
+  How They Fit in MCP Architecture
+
+  User Message
+      │
+      ▼
+  Mock Claude (simulated) ── analyzes intent ── decides which tool(s) to call
+      │
+      ▼
+  MCP Client ── sends tools/call request ──▶ MCP Server
+      │                                          │
+      │                                    Executes tool:
+      │                                    • calculator → does math
+      │                                    • get_weather → looks up city
+      │                                    • notes → save/get/list
+      │                                          │
+      ◀── returns tool result ──────────────────┘
+      │
+      ▼
+  Mock Claude ── synthesizes final answer from tool results
+      │
+      ▼
+  User sees the response
+
+
+  All three tools are independent MCP servers in concept — each exposes its own capabilities, and the LLM decides which
+  to call based on the user's message. You can see the full JSON-RPC protocol flow in the Protocol Inspector panel on
+  the right side of the app.
+
+> add more mcp tools
+
+● I'll add several new MCP tools to make the simulator more interesting.
+
+● Read 1 file (ctrl+o to expand)
+
+● Now let me read the SUGGESTED array and the rest to understand the full structure.
+
+● Read 1 file (ctrl+o to expand)
+
+● Now I'll add 5 new tools. Let me make all the edits.
+
+  1) Add new tool definitions to MCP_TOOLS:
+
+● Update(C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator/src/App.jsx)
+  ⎿  Added 67 lines
+       49        required: ["action"],
+       50      },
+       51    },
+       52 +  {
+       53 +    name: "unit_converter",
+       54 +    description: "Convert between units. Supports length (km/mi/m/ft), weight (kg/lb/g/oz), and temper
+          +ature (C/F/K).",
+       55 +    input_schema: {
+       56 +      type: "object",
+       57 +      properties: {
+       58 +        value: { type: "number", description: "The numeric value to convert" },
+       59 +        from: { type: "string", description: "Source unit (e.g. km, mi, kg, lb, C, F)" },
+       60 +        to: { type: "string", description: "Target unit (e.g. km, mi, kg, lb, C, F)" },
+       61 +      },
+       62 +      required: ["value", "from", "to"],
+       63 +    },
+       64 +  },
+       65 +  {
+       66 +    name: "random_generator",
+       67 +    description: "Generate random values: roll dice, flip coin, pick number, or generate password.",
+       68 +    input_schema: {
+       69 +      type: "object",
+       70 +      properties: {
+       71 +        type: { type: "string", enum: ["dice", "coin", "number", "password"] },
+       72 +        min: { type: "number", description: "Min value (for number type)" },
+       73 +        max: { type: "number", description: "Max value (for number type)" },
+       74 +        length: { type: "number", description: "Password length (for password type)" },
+       75 +      },
+       76 +      required: ["type"],
+       77 +    },
+       78 +  },
+       79 +  {
+       80 +    name: "datetime",
+       81 +    description: "Get current date/time, or calculate difference between two dates.",
+       82 +    input_schema: {
+       83 +      type: "object",
+       84 +      properties: {
+       85 +        action: { type: "string", enum: ["now", "diff", "add"] },
+       86 +        date1: { type: "string", description: "First date (YYYY-MM-DD)" },
+       87 +        date2: { type: "string", description: "Second date (YYYY-MM-DD)" },
+       88 +        days: { type: "number", description: "Days to add (for add action)" },
+       89 +      },
+       90 +      required: ["action"],
+       91 +    },
+       92 +  },
+       93 +  {
+       94 +    name: "translator",
+       95 +    description: "Translate text between languages. Supports English, Spanish, French, German, Japanes
+          +e, Hindi.",
+       96 +    input_schema: {
+       97 +      type: "object",
+       98 +      properties: {
+       99 +        text: { type: "string", description: "Text to translate" },
+      100 +        from: { type: "string", description: "Source language" },
+      101 +        to: { type: "string", description: "Target language" },
+      102 +      },
+      103 +      required: ["text", "to"],
+      104 +    },
+      105 +  },
+      106 +  {
+      107 +    name: "todo_list",
+      108 +    description: "Manage a to-do list. Add, complete, remove, or list tasks.",
+      109 +    input_schema: {
+      110 +      type: "object",
+      111 +      properties: {
+      112 +        action: { type: "string", enum: ["add", "complete", "remove", "list"] },
+      113 +        task: { type: "string", description: "Task description (for add)" },
+      114 +        id: { type: "number", description: "Task ID (for complete/remove)" },
+      115 +      },
+      116 +      required: ["action"],
+      117 +    },
+      118 +  },
+      119  ];
+      120
+      121  // ─── Mock MCP Server Executor ─────────────────────────────────────────────────
+
+● 2) Add executors for new tools:
+
+● Update(C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator/src/App.jsx)
+  ⎿  Added 103 lines
+      133
+      134  // ─── Mock MCP Server Executor ─────────────────────────────────────────────────
+      135  const notesStore = {};
+      136 +const todoStore = [];
+      137 +let todoIdCounter = 0;
+      138 +
+      139  function executeTool(name, args) {
+      140    if (name === "calculator") {
+      141      const { operation, a, b } = args;
+     ...
+      154        "new york": { temp: "18°C", condition: "Partly cloudy", humidity: "62%" },
+      155        paris: { temp: "15°C", condition: "Light rain", humidity: "80%" },
+      156        sydney: { temp: "25°C", condition: "Clear sky", humidity: "48%" },
+      157 +      mumbai: { temp: "32°C", condition: "Humid", humidity: "85%" },
+      158 +      dubai: { temp: "38°C", condition: "Sunny", humidity: "30%" },
+      159 +      berlin: { temp: "8°C", condition: "Cloudy", humidity: "72%" },
+      160      };
+      161      const key = args.city.toLowerCase();
+      162      const data = forecasts[key] || {
+     ...
+      178        return { keys: Object.keys(notesStore) };
+      179      }
+      180    }
+      181 +  if (name === "unit_converter") {
+      182 +    const { value, from, to } = args;
+      183 +    const conversions = {
+      184 +      "km_mi": 0.621371, "mi_km": 1.60934, "m_ft": 3.28084, "ft_m": 0.3048,
+      185 +      "kg_lb": 2.20462, "lb_kg": 0.453592, "g_oz": 0.035274, "oz_g": 28.3495,
+      186 +      "km_m": 1000, "m_km": 0.001, "mi_ft": 5280, "ft_mi": 0.000189394,
+      187 +    };
+      188 +    const f = from.toLowerCase();
+      189 +    const t = to.toLowerCase();
+      190 +    if (f === "c" && t === "f") return { result: (value * 9/5) + 32, expression: `${value}°C = ${((val
+          +ue * 9/5) + 32).toFixed(2)}°F` };
+      191 +    if (f === "f" && t === "c") return { result: (value - 32) * 5/9, expression: `${value}°F = ${(((va
+          +lue - 32) * 5/9)).toFixed(2)}°C` };
+      192 +    if (f === "c" && t === "k") return { result: value + 273.15, expression: `${value}°C = ${(value +
+          +273.15).toFixed(2)}K` };
+      193 +    if (f === "k" && t === "c") return { result: value - 273.15, expression: `${value}K = ${(value - 2
+          +73.15).toFixed(2)}°C` };
+      194 +    if (f === "f" && t === "k") return { result: (value - 32) * 5/9 + 273.15, expression: `${value}°F
+          += ${(((value - 32) * 5/9 + 273.15)).toFixed(2)}K` };
+      195 +    const key = `${f}_${t}`;
+      196 +    if (conversions[key]) {
+      197 +      const result = value * conversions[key];
+      198 +      return { result: parseFloat(result.toFixed(4)), expression: `${value} ${from} = ${result.toFixed
+          +(4)} ${to}` };
+      199 +    }
+      200 +    return { error: `Unsupported conversion: ${from} to ${to}` };
+      201 +  }
+      202 +  if (name === "random_generator") {
+      203 +    if (args.type === "dice") {
+      204 +      const roll = Math.floor(Math.random() * 6) + 1;
+      205 +      return { result: roll, description: `Rolled a dice: ${roll}` };
+      206 +    }
+      207 +    if (args.type === "coin") {
+      208 +      const flip = Math.random() < 0.5 ? "Heads" : "Tails";
+      209 +      return { result: flip, description: `Coin flip: ${flip}` };
+      210 +    }
+      211 +    if (args.type === "number") {
+      212 +      const min = args.min || 1;
+      213 +      const max = args.max || 100;
+      214 +      const num = Math.floor(Math.random() * (max - min + 1)) + min;
+      215 +      return { result: num, description: `Random number between ${min}-${max}: ${num}` };
+      216 +    }
+      217 +    if (args.type === "password") {
+      218 +      const len = args.length || 16;
+      219 +      const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*";
+      220 +      let pw = "";
+      221 +      for (let i = 0; i < len; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+      222 +      return { result: pw, description: `Generated ${len}-char password` };
+      223 +    }
+      224 +    return { error: "Unknown random type" };
+      225 +  }
+      226 +  if (name === "datetime") {
+      227 +    if (args.action === "now") {
+      228 +      const now = new Date();
+      229 +      return { date: now.toLocaleDateString(), time: now.toLocaleTimeString(), iso: now.toISOString(),
+          + day: now.toLocaleDateString("en-US", { weekday: "long" }) };
+      230 +    }
+      231 +    if (args.action === "diff") {
+      232 +      const d1 = new Date(args.date1);
+      233 +      const d2 = new Date(args.date2);
+      234 +      const diffMs = Math.abs(d2 - d1);
+      235 +      const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      236 +      return { days, weeks: Math.floor(days / 7), months: Math.floor(days / 30), description: `${days}
+          + days between ${args.date1} and ${args.date2}` };
+      237 +    }
+      238 +    if (args.action === "add") {
+      239 +      const base = args.date1 ? new Date(args.date1) : new Date();
+      240 +      base.setDate(base.getDate() + (args.days || 0));
+      241 +      return { result: base.toISOString().split("T")[0], description: `${args.days} days from ${args.d
+          +ate1 || "today"} = ${base.toISOString().split("T")[0]}` };
+      242 +    }
+      243 +    return { error: "Unknown datetime action" };
+      244 +  }
+      245 +  if (name === "translator") {
+      246 +    const dictionary = {
+      247 +      english: { hello: { spanish: "hola", french: "bonjour", german: "hallo", japanese: "konnichiwa",
+          + hindi: "namaste" }, goodbye: { spanish: "adiós", french: "au revoir", german: "auf wiedersehen", japa
+          +nese: "sayonara", hindi: "alvida" }, "thank you": { spanish: "gracias", french: "merci", german: "dank
+          +e", japanese: "arigatou", hindi: "dhanyavaad" }, "good morning": { spanish: "buenos días", french: "bo
+          +njour", german: "guten morgen", japanese: "ohayou gozaimasu", hindi: "suprabhat" }, "how are you": { s
+          +panish: "¿cómo estás?", french: "comment allez-vous?", german: "wie geht es Ihnen?", japanese: "o genk
+          +i desu ka?", hindi: "aap kaise hain?" }, yes: { spanish: "sí", french: "oui", german: "ja", japanese:
+          +"hai", hindi: "haan" }, no: { spanish: "no", french: "non", german: "nein", japanese: "iie", hindi: "n
+          +ahi" }, please: { spanish: "por favor", french: "s'il vous plaît", german: "bitte", japanese: "onegais
+          +himasu", hindi: "kripya" }, "i love you": { spanish: "te amo", french: "je t'aime", german: "ich liebe
+          + dich", japanese: "aishiteru", hindi: "main tumse pyaar karta hoon" }, welcome: { spanish: "bienvenido
+          +", french: "bienvenue", german: "willkommen", japanese: "youkoso", hindi: "swagat hai" } },
+      248 +    };
+      249 +    const textLower = args.text.toLowerCase().trim();
+      250 +    const toLang = args.to.toLowerCase();
+      251 +    const translated = dictionary.english[textLower]?.[toLang];
+      252 +    if (translated) {
+      253 +      return { original: args.text, translated, from: args.from || "English", to: args.to };
+      254 +    }
+      255 +    return { original: args.text, translated: `[${args.to}] ${args.text}`, from: args.from || "English
+          +", to: args.to, note: "Simulated translation (phrase not in dictionary)" };
+      256 +  }
+      257 +  if (name === "todo_list") {
+      258 +    if (args.action === "add") {
+      259 +      const id = ++todoIdCounter;
+      260 +      todoStore.push({ id, task: args.task, done: false });
+      261 +      return { success: true, message: `Task #${id} added: "${args.task}"`, id };
+      262 +    }
+      263 +    if (args.action === "complete") {
+      264 +      const item = todoStore.find((t) => t.id === args.id);
+      265 +      if (item) { item.done = true; return { success: true, message: `Task #${args.id} completed: "${i
+          +tem.task}"` }; }
+      266 +      return { error: `Task #${args.id} not found` };
+      267 +    }
+      268 +    if (args.action === "remove") {
+      269 +      const idx = todoStore.findIndex((t) => t.id === args.id);
+      270 +      if (idx !== -1) { const removed = todoStore.splice(idx, 1)[0]; return { success: true, message:
+          +`Task #${args.id} removed: "${removed.task}"` }; }
+      271 +      return { error: `Task #${args.id} not found` };
+      272 +    }
+      273 +    if (args.action === "list") {
+      274 +      return { tasks: todoStore.map((t) => ({ id: t.id, task: t.task, status: t.done ? "done" : "pendi
+          +ng" })), total: todoStore.length, pending: todoStore.filter((t) => !t.done).length };
+      275 +    }
+      276 +    return { error: "Unknown todo action" };
+      277 +  }
+      278    return { error: "Unknown tool" };
+      279  }
+      280
+
+● 3) Now update the mock Claude intent detection and response generation:
+
+● Read 1 file (ctrl+o to expand)
+
+● Now replace the mockClaudeDecision and mockClaudeFinalResponse functions with updated versions that handle the new
+  tools:
+
+● Update(C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator/src/App.jsx)
+  ⎿  Added 80 lines, removed 59 lines
+      448      { regex: /(\d+(?:\.\d+)?)\s*[×*x]\s*(\d+(?:\.\d+)?)/i, op: "multiply" },
+      449      { regex: /(\d+(?:\.\d+)?)\s*[÷/]\s*(\d+(?:\.\d+)?)/, op: "divide" },
+      450    ];
+      451 -
+      451    const wordPatterns = [
+      452      { regex: /(\d+(?:\.\d+)?)\s+plus\s+(\d+(?:\.\d+)?)/i, op: "add" },
+      453      { regex: /(\d+(?:\.\d+)?)\s+minus\s+(\d+(?:\.\d+)?)/i, op: "subtract" },
+      455 -    {
+      456 -      regex: /(\d+(?:\.\d+)?)\s+(?:times|multiplied\s+by)\s+(\d+(?:\.\d+)?)/i,
+      457 -      op: "multiply",
+      458 -    },
+      459 -    {
+      460 -      regex: /(\d+(?:\.\d+)?)\s+(?:divided\s+by|over)\s+(\d+(?:\.\d+)?)/i,
+      461 -      op: "divide",
+      462 -    },
+      454 +    { regex: /(\d+(?:\.\d+)?)\s+(?:times|multiplied\s+by)\s+(\d+(?:\.\d+)?)/i, op: "multiply" },
+      455 +    { regex: /(\d+(?:\.\d+)?)\s+(?:divided\s+by|over)\s+(\d+(?:\.\d+)?)/i, op: "divide" },
+      456    ];
+      464 -
+      465 -  const allMathPatterns = [...mathPatterns, ...wordPatterns];
+      466 -
+      467 -  for (const { regex, op } of allMathPatterns) {
+      457 +  for (const { regex, op } of [...mathPatterns, ...wordPatterns]) {
+      458      const m = userText.match(regex);
+      459      if (m) {
+      460        const a = parseFloat(m[1]);
+      461        const b = parseFloat(m[2]);
+      462        if (!isNaN(a) && !isNaN(b)) {
+      473 -        toolCalls.push({
+      474 -          type: "tool_use",
+      475 -          id: `toolu_mock_${++toolIdCounter}`,
+      476 -          name: "calculator",
+      477 -          input: { operation: op, a, b },
+      478 -        });
+      463 +        toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "calculator", in
+          +put: { operation: op, a, b } });
+      464        }
+      465      }
+      466    }
+     ...
+      469    const weatherMatch = text.match(/weather\s+(?:in|for|at)\s+([a-z\s]+)/);
+      470    if (weatherMatch) {
+      471      const city = weatherMatch[1].trim().replace(/[?.!,]+$/, "");
+      487 -    toolCalls.push({
+      488 -      type: "tool_use",
+      489 -      id: `toolu_mock_${++toolIdCounter}`,
+      490 -      name: "get_weather",
+      491 -      input: { city: city.charAt(0).toUpperCase() + city.slice(1) },
+      492 -    });
+      472 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "get_weather", input
+          +: { city: city.charAt(0).toUpperCase() + city.slice(1) } });
+      473    }
+      474
+      475    // Detect notes intent
+      476    if (text.match(/save\s+(a\s+)?note/)) {
+      477      const keyMatch = userText.match(/(?:called|named|key)\s+['"]([^'"]+)['"]/i);
+      498 -    const contentMatch = userText.match(
+      499 -      /(?:content|with|saying)\s+['"]([^'"]+)['"]/i,
+      500 -    );
+      501 -    toolCalls.push({
+      502 -      type: "tool_use",
+      503 -      id: `toolu_mock_${++toolIdCounter}`,
+      504 -      name: "notes",
+      505 -      input: {
+      506 -        action: "save",
+      507 -        key: keyMatch?.[1] || "untitled",
+      508 -        content: contentMatch?.[1] || "empty",
+      509 -      },
+      510 -    });
+      511 -  } else if (
+      512 -    text.match(/list\s+(my\s+)?notes/) ||
+      513 -    text.match(/show\s+(my\s+)?notes/)
+      514 -  ) {
+      515 -    toolCalls.push({
+      516 -      type: "tool_use",
+      517 -      id: `toolu_mock_${++toolIdCounter}`,
+      518 -      name: "notes",
+      519 -      input: { action: "list" },
+      520 -    });
+      478 +    const contentMatch = userText.match(/(?:content|with|saying)\s+['"]([^'"]+)['"]/i);
+      479 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "notes", input: { ac
+          +tion: "save", key: keyMatch?.[1] || "untitled", content: contentMatch?.[1] || "empty" } });
+      480 +  } else if (text.match(/list\s+(my\s+)?notes/) || text.match(/show\s+(my\s+)?notes/)) {
+      481 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "notes", input: { ac
+          +tion: "list" } });
+      482    } else if (text.match(/get\s+(my\s+)?note/)) {
+      483      const keyMatch = userText.match(/(?:called|named|key)\s+['"]([^'"]+)['"]/i);
+      523 -    toolCalls.push({
+      524 -      type: "tool_use",
+      525 -      id: `toolu_mock_${++toolIdCounter}`,
+      526 -      name: "notes",
+      527 -      input: { action: "get", key: keyMatch?.[1] || "untitled" },
+      528 -    });
+      484 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "notes", input: { ac
+          +tion: "get", key: keyMatch?.[1] || "untitled" } });
+      485    }
+      486
+      487 +  // Detect unit conversion intent
+      488 +  const convertMatch = text.match(/convert\s+(\d+(?:\.\d+)?)\s*(\w+)\s+to\s+(\w+)/i);
+      489 +  if (convertMatch) {
+      490 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "unit_converter", in
+          +put: { value: parseFloat(convertMatch[1]), from: convertMatch[2], to: convertMatch[3] } });
+      491 +  } else {
+      492 +    const tempMatch = text.match(/(\d+(?:\.\d+)?)\s*°?\s*(celsius|fahrenheit|kelvin|c|f|k)\s+(?:to|in)
+          +\s+°?\s*(celsius|fahrenheit|kelvin|c|f|k)/i);
+      493 +    if (tempMatch) {
+      494 +      const unitMap = { celsius: "C", fahrenheit: "F", kelvin: "K", c: "C", f: "F", k: "K" };
+      495 +      toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "unit_converter",
+          +input: { value: parseFloat(tempMatch[1]), from: unitMap[tempMatch[2].toLowerCase()], to: unitMap[tempM
+          +atch[3].toLowerCase()] } });
+      496 +    }
+      497 +  }
+      498 +
+      499 +  // Detect random generator intent
+      500 +  if (text.match(/roll\s+(a\s+)?dice/) || text.match(/dice\s+roll/)) {
+      501 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "random_generator",
+          +input: { type: "dice" } });
+      502 +  }
+      503 +  if (text.match(/flip\s+(a\s+)?coin/) || text.match(/coin\s+flip/) || text.match(/heads\s+or\s+tails/
+          +)) {
+      504 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "random_generator",
+          +input: { type: "coin" } });
+      505 +  }
+      506 +  const randNumMatch = text.match(/random\s+number\s+(?:between\s+)?(\d+)\s+(?:and|to|-)\s+(\d+)/);
+      507 +  if (randNumMatch) {
+      508 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "random_generator",
+          +input: { type: "number", min: parseInt(randNumMatch[1]), max: parseInt(randNumMatch[2]) } });
+      509 +  }
+      510 +  if (text.match(/generate\s+(a\s+)?password/) || text.match(/random\s+password/)) {
+      511 +    const lenMatch = text.match(/(\d+)\s*(?:char|character|length)/);
+      512 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "random_generator",
+          +input: { type: "password", length: lenMatch ? parseInt(lenMatch[1]) : 16 } });
+      513 +  }
+      514 +
+      515 +  // Detect datetime intent
+      516 +  if (text.match(/what\s+(?:is\s+)?(?:the\s+)?(?:current\s+)?(?:date|time|day)/) || text.match(/today'
+          +?s?\s+date/) || text.match(/what\s+time/)) {
+      517 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "datetime", input: {
+          + action: "now" } });
+      518 +  }
+      519 +  const dateDiffMatch = text.match(/(?:days?|how\s+(?:long|many\s+days?))\s+between\s+(\d{4}-\d{2}-\d{
+          +2})\s+and\s+(\d{4}-\d{2}-\d{2})/);
+      520 +  if (dateDiffMatch) {
+      521 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "datetime", input: {
+          + action: "diff", date1: dateDiffMatch[1], date2: dateDiffMatch[2] } });
+      522 +  }
+      523 +  const dateAddMatch = text.match(/(\d+)\s+days?\s+from\s+(?:today|now|(\d{4}-\d{2}-\d{2}))/);
+      524 +  if (dateAddMatch) {
+      525 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "datetime", input: {
+          + action: "add", days: parseInt(dateAddMatch[1]), date1: dateAddMatch[2] || null } });
+      526 +  }
+      527 +
+      528 +  // Detect translator intent
+      529 +  const translateMatch = text.match(/translate\s+['"]?(.+?)['"]?\s+(?:to|in|into)\s+(spanish|french|ge
+          +rman|japanese|hindi)/i);
+      530 +  if (translateMatch) {
+      531 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "translator", input:
+          + { text: translateMatch[1].replace(/['"]+$/, "").trim(), to: translateMatch[2] } });
+      532 +  }
+      533 +  const howToSayMatch = text.match(/how\s+(?:do\s+you\s+)?say\s+['"]?(.+?)['"]?\s+in\s+(spanish|french
+          +|german|japanese|hindi)/i);
+      534 +  if (howToSayMatch) {
+      535 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "translator", input:
+          + { text: howToSayMatch[1].replace(/['"]+$/, "").trim(), to: howToSayMatch[2] } });
+      536 +  }
+      537 +
+      538 +  // Detect todo list intent
+      539 +  const addTaskMatch = text.match(/add\s+(?:a\s+)?(?:task|todo)\s+['"]?(.+?)['"]?\s*$/i);
+      540 +  if (addTaskMatch) {
+      541 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "todo_list", input:
+          +{ action: "add", task: addTaskMatch[1].replace(/['"]+$/, "").trim() } });
+      542 +  }
+      543 +  if (text.match(/list\s+(?:my\s+)?(?:tasks|todos?)/) || text.match(/show\s+(?:my\s+)?(?:tasks|todos?)
+          +/)) {
+      544 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "todo_list", input:
+          +{ action: "list" } });
+      545 +  }
+      546 +  const completeTaskMatch = text.match(/complete\s+task\s+#?(\d+)/i);
+      547 +  if (completeTaskMatch) {
+      548 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "todo_list", input:
+          +{ action: "complete", id: parseInt(completeTaskMatch[1]) } });
+      549 +  }
+      550 +  const removeTaskMatch = text.match(/(?:remove|delete)\s+task\s+#?(\d+)/i);
+      551 +  if (removeTaskMatch) {
+      552 +    toolCalls.push({ type: "tool_use", id: `toolu_mock_${++toolIdCounter}`, name: "todo_list", input:
+          +{ action: "remove", id: parseInt(removeTaskMatch[1]) } });
+      553 +  }
+      554 +
+      555    if (toolCalls.length > 0) {
+      556      return {
+      557        id: `msg_mock_${Date.now()}`,
+     ...
+      560        model: "claude-sonnet-4-20250514 (simulated)",
+      561        stop_reason: "tool_use",
+      562        content: [
+      539 -        {
+      540 -          type: "text",
+      541 -          text: "I'll use the available tools to help you with that.",
+      542 -        },
+      563 +        { type: "text", text: "I'll use the available tools to help you with that." },
+      564          ...toolCalls,
+      565        ],
+      566      };
+     ...
+      575      content: [
+      576        {
+      577          type: "text",
+      557 -        text: `I'd be happy to help! Try asking me to:\n\n• Calculate something (e.g. "What is 25 × 4?
+          -")\n• Check weather (e.g. "Weather in Tokyo")\n• Save/list notes (e.g. "Save a note called 'idea' with
+          - content 'hello'")`,
+      578 +        text: `I'd be happy to help! Try asking me to:\n\n• Calculate: "What is 25 × 4?"\n• Weather: "
+          +Weather in Tokyo"\n• Notes: "Save a note called 'idea' with content 'hello'"\n• Convert: "Convert 100
+          +km to mi"\n• Random: "Roll a dice", "Flip a coin", "Generate a password"\n• Date/Time: "What's the dat
+          +e?", "30 days from today"\n• Translate: "Translate hello to Spanish"\n• Todos: "Add task 'Buy grocerie
+          +s'", "List my tasks"`,
+      579        },
+      580      ],
+      581    };
+
+● Now update the mockClaudeFinalResponse to handle new tool results:
+
+● Read 1 file (ctrl+o to expand)
+
+● Update(C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator/src/App.jsx)
+  ⎿  Added 49 lines, removed 17 lines
+      774    const parts = [];
+      775    for (const tr of toolResults) {
+      776      const data = JSON.parse(tr.content);
+      777 +    // Calculator
+      778      if (data.expression) {
+      779        parts.push(`The result of ${data.expression}.`);
+      779 -    } else if (data.city) {
+      780 -      parts.push(
+      781 -        `The weather in ${data.city}: ${data.temp}, ${data.condition}, humidity ${data.humidity}.`,
+      782 -      );
+      783 -    } else if (data.success) {
+      780 +    }
+      781 +    // Weather
+      782 +    else if (data.city && data.temp) {
+      783 +      parts.push(`The weather in ${data.city}: ${data.temp}, ${data.condition}, humidity ${data.humidi
+          +ty}.`);
+      784 +    }
+      785 +    // Success messages (notes save, todo add/complete/remove)
+      786 +    else if (data.success && data.message) {
+      787        parts.push(data.message);
+      785 -    } else if (data.keys) {
+      786 -      parts.push(
+      787 -        data.keys.length > 0
+      788 -          ? `Your saved notes: ${data.keys.join(", ")}`
+      789 -          : "You have no saved notes yet.",
+      790 -      );
+      791 -    } else if (data.key && data.content !== undefined) {
+      792 -      parts.push(
+      793 -        data.content
+      794 -          ? `Note "${data.key}": ${data.content}`
+      795 -          : `Note "${data.key}" was not found.`,
+      796 -      );
+      788      }
+      789 +    // Notes list
+      790 +    else if (data.keys) {
+      791 +      parts.push(data.keys.length > 0 ? `Your saved notes: ${data.keys.join(", ")}` : "You have no sav
+          +ed notes yet.");
+      792 +    }
+      793 +    // Notes get
+      794 +    else if (data.key && data.content !== undefined) {
+      795 +      parts.push(data.content ? `Note "${data.key}": ${data.content}` : `Note "${data.key}" was not fo
+          +und.`);
+      796 +    }
+      797 +    // Random generator
+      798 +    else if (data.description && data.result !== undefined) {
+      799 +      parts.push(data.description + (data.result && typeof data.result === "string" && data.result.len
+          +gth > 10 ? `\n${data.result}` : ""));
+      800 +    }
+      801 +    // Datetime now
+      802 +    else if (data.date && data.time && data.day) {
+      803 +      parts.push(`Current date: ${data.date} (${data.day})\nTime: ${data.time}`);
+      804 +    }
+      805 +    // Datetime diff
+      806 +    else if (data.days !== undefined && data.weeks !== undefined) {
+      807 +      parts.push(data.description || `${data.days} days (${data.weeks} weeks, ~${data.months} months)`
+          +);
+      808 +    }
+      809 +    // Translator
+      810 +    else if (data.translated && data.original) {
+      811 +      parts.push(`"${data.original}" in ${data.to}: "${data.translated}"${data.note ? ` (${data.note})
+          +` : ""}`);
+      812 +    }
+      813 +    // Todo list
+      814 +    else if (data.tasks !== undefined) {
+      815 +      if (data.tasks.length === 0) {
+      816 +        parts.push("Your to-do list is empty.");
+      817 +      } else {
+      818 +        const taskLines = data.tasks.map((t) => `  ${t.status === "done" ? "[x]" : "[ ]"} #${t.id}: ${
+          +t.task}`).join("\n");
+      819 +        parts.push(`Your tasks (${data.pending} pending, ${data.total} total):\n${taskLines}`);
+      820 +      }
+      821 +    }
+      822 +    // Generic result/description
+      823 +    else if (data.result !== undefined) {
+      824 +      parts.push(data.description || `Result: ${data.result}`);
+      825 +    }
+      826 +    // Error
+      827 +    else if (data.error) {
+      828 +      parts.push(`Error: ${data.error}`);
+      829 +    }
+      830    }
+      831    return {
+      832      id: `msg_mock_${Date.now()}`,
+
+● Now update the SUGGESTED queries to showcase all tools:
+
+● Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Update(C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator/src/App.jsx)
+  ⎿  Added 10 lines, removed 3 lines
+      1040    const SUGGESTED = [
+      1041      "What is 1337 × 42?",
+      1042      "What's the weather in Tokyo?",
+      1043 -    "Save a note called 'idea' with content 'Build MCP server next'",
+      1044 -    "What's 100 divided by 4, and what's the weather in Paris?",
+      1045 -    "List my notes",
+      1043 +    "Convert 100 km to mi",
+      1044 +    "Roll a dice",
+      1045 +    "Flip a coin",
+      1046 +    "Generate a password",
+      1047 +    "What's the date?",
+      1048 +    "Translate hello to Japanese",
+      1049 +    "How do you say thank you in French?",
+      1050 +    "Add task 'Learn MCP protocol'",
+      1051 +    "30 days from today",
+      1052 +    "Save a note called 'idea' with content 'Build MCP server'",
+      1053    ];
+      1054
+      1055    async function sendMessage(userText) {
+
+● The app should auto-reload. Here are the 5 new MCP tools added:
+
+  New Tools
+
+  Tool: unit_converter
+  What it does: Converts length (km/mi/m/ft), weight (kg/lb/g/oz), temperature (C/F/K)
+  Try saying: "Convert 100 km to mi", "32 F to C"
+  ────────────────────────────────────────
+  Tool: random_generator
+  What it does: Roll dice, flip coin, pick random number, generate password
+  Try saying: "Roll a dice", "Flip a coin", "Generate a password", "Random number between 1 and 100"
+  ────────────────────────────────────────
+  Tool: datetime
+  What it does: Get current date/time, date differences, add days
+  Try saying: "What's the date?", "30 days from today", "Days between 2025-01-01 and 2025-12-31"
+  ────────────────────────────────────────
+  Tool: translator
+  What it does: Translate to Spanish, French, German, Japanese, Hindi
+  Try saying: "Translate hello to Japanese", "How do you say thank you in French?"
+  ────────────────────────────────────────
+  Tool: todo_list
+  What it does: Add, complete, remove, and list tasks
+  Try saying: "Add task 'Learn MCP'", "List my tasks", "Complete task #1"
+
+  You now have 8 total MCP tools in the simulator. The Protocol Inspector will show the full JSON-RPC flow for each one.
+
+✻ Baked for 3m 4s
+
+> list my tasks
+
+● If you typed "list my tasks" in the simulator, it should trigger the todo_list tool with action: "list".
+
+  Since you haven't added any tasks yet, it will return: "Your to-do list is empty."
+
+  Try this flow to see it in action:
+
+  1. Add task 'Learn MCP protocol'
+  2. Add task 'Build an MCP server'
+  3. List my tasks — now you'll see both tasks
+  4. Complete task #1
+  5. List my tasks — task #1 will show [x] as done
+
+  Each step will show the full MCP protocol flow (tool discovery → Claude decision → tool execution → result) in the
+  Protocol Inspector on the right.
+
+> add task 'Learn MCP protocol'
+
+● When you type that in the simulator, here's what happens in the Protocol Inspector:
+
+  1. CLIENT → SERVER    tools/list request
+  2. SERVER → CLIENT    tools/list response — 8 tools available
+  3. CLAUDE (SIMULATED) Sending tools + conversation to Claude
+  4. CLAUDE (SIMULATED) Claude responded — stop_reason: tool_use
+  5. CLIENT → SERVER    tools/call → todo_list
+  6. TOOL EXEC          todo_list executed → {"success":true,"message":"Task #1 added..."}
+  7. SERVER → CLIENT    tools/call result for todo_list
+  8. CLAUDE (SIMULATED) Sending tool results back to Claude
+  9. CLAUDE (SIMULATED) Claude responded — stop_reason: end_turn
+  10. FINAL RESULT      Task #1 added: "Learn MCP protocol"
+
+
+  Now try these next:
+  - Add task 'Build an MCP server' — adds task #2
+  - List my tasks — shows both tasks
+  - Complete task #1 — marks it done
+  - Delete task #2 — removes it
+
+  All running locally, no API needed!
+
+> how to see all the tasks that i added in mcp
+
+● Just type any of these in the simulator input:
+
+  - List my tasks
+  - Show my tasks
+  - List my todos
+
+  This triggers the todo_list tool with action: "list" and shows output like:
+
+  Your tasks (2 pending, 3 total):
+    [ ] #1: Learn MCP protocol
+    [ ] #2: Build an MCP server
+    [x] #3: Review MCP docs       ← completed
+
+
+  All todo commands:
+
+  ┌──────────┬──────────────────────────────────┬─────────────────────────────────┐
+  │  Action  │           What to type           │             Example             │
+  ├──────────┼──────────────────────────────────┼─────────────────────────────────┤
+  │ Add      │ Add task 'your task'             │ Add task 'Deploy to production' │
+  ├──────────┼──────────────────────────────────┼─────────────────────────────────┤
+  │ List     │ List my tasks                    │ List my tasks                   │
+  ├──────────┼──────────────────────────────────┼─────────────────────────────────┤
+  │ Complete │ Complete task #N                 │ Complete task #1                │
+  ├──────────┼──────────────────────────────────┼─────────────────────────────────┤
+  │ Remove   │ Remove task #N or Delete task #N │ Delete task #2                  │
+  └──────────┴──────────────────────────────────┴─────────────────────────────────┘
+
+  Note: Tasks are stored in memory only — they reset when you refresh the page. Go try List my tasks in the simulator
+  now!
+
+> add tool translate language to any lanugae i want
+
+● I'll expand the translator to support many more languages and make it accept any language name.
+
+● Searched for 1 pattern (ctrl+o to expand)
+
+● 1) Update the tool definition:
+
+● Update(C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator/src/App.jsx)
+  ⎿  Added 1 line, removed 1 line
+      105    {
+      106      name: "translator",
+      107      description:
+      108 -      "Translate text between languages. Supports English, Spanish, French, German, Japanese, Hindi.",
+      108 +      "Translate text to any language. Supports 20+ languages including Spanish, French, German, Japan
+          +ese, Hindi, Korean, Chinese, Arabic, Tamil, Telugu, and more.",
+      109      input_schema: {
+      110        type: "object",
+      111        properties: {
+
+● 2) Replace the translator executor with a much bigger dictionary:
+
+● Update(C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator/src/App.jsx)
+  ⎿  Added 21 lines, removed 88 lines
+      293      return { error: "Unknown datetime action" };
+      294    }
+      295    if (name === "translator") {
+      296 -    const dictionary = {
+      297 -      english: {
+      298 -        hello: {
+      299 -          spanish: "hola",
+      300 -          french: "bonjour",
+      301 -          german: "hallo",
+      302 -          japanese: "konnichiwa",
+      303 -          hindi: "namaste",
+      304 -        },
+      305 -        goodbye: {
+      306 -          spanish: "adiós",
+      307 -          french: "au revoir",
+      308 -          german: "auf wiedersehen",
+      309 -          japanese: "sayonara",
+      310 -          hindi: "alvida",
+      311 -        },
+      312 -        "thank you": {
+      313 -          spanish: "gracias",
+      314 -          french: "merci",
+      315 -          german: "danke",
+      316 -          japanese: "arigatou",
+      317 -          hindi: "dhanyavaad",
+      318 -        },
+      319 -        "good morning": {
+      320 -          spanish: "buenos días",
+      321 -          french: "bonjour",
+      322 -          german: "guten morgen",
+      323 -          japanese: "ohayou gozaimasu",
+      324 -          hindi: "suprabhat",
+      325 -        },
+      326 -        "how are you": {
+      327 -          spanish: "¿cómo estás?",
+      328 -          french: "comment allez-vous?",
+      329 -          german: "wie geht es Ihnen?",
+      330 -          japanese: "o genki desu ka?",
+      331 -          hindi: "aap kaise hain?",
+      332 -        },
+      333 -        yes: {
+      334 -          spanish: "sí",
+      335 -          french: "oui",
+      336 -          german: "ja",
+      337 -          japanese: "hai",
+      338 -          hindi: "haan",
+      339 -        },
+      340 -        no: {
+      341 -          spanish: "no",
+      342 -          french: "non",
+      343 -          german: "nein",
+      344 -          japanese: "iie",
+      345 -          hindi: "nahi",
+      346 -        },
+      347 -        please: {
+      348 -          spanish: "por favor",
+      349 -          french: "s'il vous plaît",
+      350 -          german: "bitte",
+      351 -          japanese: "onegaishimasu",
+      352 -          hindi: "kripya",
+      353 -        },
+      354 -        "i love you": {
+      355 -          spanish: "te amo",
+      356 -          french: "je t'aime",
+      357 -          german: "ich liebe dich",
+      358 -          japanese: "aishiteru",
+      359 -          hindi: "main tumse pyaar karta hoon",
+      360 -        },
+      361 -        welcome: {
+      362 -          spanish: "bienvenido",
+      363 -          french: "bienvenue",
+      364 -          german: "willkommen",
+      365 -          japanese: "youkoso",
+      366 -          hindi: "swagat hai",
+      367 -        },
+      368 -      },
+      296 +    const dict = {
+      297 +      hello: { spanish:"hola", french:"bonjour", german:"hallo", japanese:"konnichiwa", hindi:"namaste
+          +", korean:"annyeonghaseyo", chinese:"ni hao", arabic:"marhaba", portuguese:"olá", italian:"ciao", russ
+          +ian:"privet", turkish:"merhaba", tamil:"vanakkam", telugu:"namaskaram", bengali:"nomoshkar", dutch:"ha
+          +llo", swedish:"hej", polish:"cześć", thai:"sawasdee", vietnamese:"xin chào", indonesian:"halo", malay:
+          +"hai", swahili:"habari", greek:"yia sou", hebrew:"shalom" },
+      298 +      goodbye: { spanish:"adiós", french:"au revoir", german:"auf wiedersehen", japanese:"sayonara", h
+          +indi:"alvida", korean:"annyeonghi gaseyo", chinese:"zàijiàn", arabic:"ma'a salama", portuguese:"adeus"
+          +, italian:"arrivederci", russian:"do svidaniya", turkish:"hoşça kal", tamil:"poitu varein", telugu:"ve
+          +ltunna", bengali:"biday", dutch:"tot ziens", swedish:"hejdå", polish:"do widzenia", thai:"la gon", vie
+          +tnamese:"tạm biệt", indonesian:"selamat tinggal", malay:"selamat tinggal", swahili:"kwaheri", greek:"a
+          +ntio", hebrew:"lehitraot" },
+      299 +      "thank you": { spanish:"gracias", french:"merci", german:"danke", japanese:"arigatou", hindi:"dh
+          +anyavaad", korean:"gamsahamnida", chinese:"xièxiè", arabic:"shukran", portuguese:"obrigado", italian:"
+          +grazie", russian:"spasibo", turkish:"teşekkürler", tamil:"nandri", telugu:"dhanyavaadalu", bengali:"dh
+          +onnobad", dutch:"dank je", swedish:"tack", polish:"dziękuję", thai:"khob khun", vietnamese:"cảm ơn", i
+          +ndonesian:"terima kasih", malay:"terima kasih", swahili:"asante", greek:"efcharisto", hebrew:"toda" },
+      300 +      "good morning": { spanish:"buenos días", french:"bonjour", german:"guten morgen", japanese:"ohay
+          +ou gozaimasu", hindi:"suprabhat", korean:"joeun achim", chinese:"zǎo shàng hǎo", arabic:"sabah al-khay
+          +r", portuguese:"bom dia", italian:"buongiorno", russian:"dobroye utro", turkish:"günaydın", tamil:"kaa
+          +lai vanakkam", telugu:"subhodayam", bengali:"suprobhat", dutch:"goedemorgen", swedish:"god morgon", po
+          +lish:"dzień dobry", thai:"arun sawat", vietnamese:"chào buổi sáng", indonesian:"selamat pagi", malay:"
+          +selamat pagi", swahili:"habari za asubuhi", greek:"kalimera", hebrew:"boker tov" },
+      301 +      "how are you": { spanish:"¿cómo estás?", french:"comment allez-vous?", german:"wie geht es Ihnen
+          +?", japanese:"o genki desu ka?", hindi:"aap kaise hain?", korean:"jal jinaesseoyo?", chinese:"nǐ hǎo m
+          +a?", arabic:"kayf halak?", portuguese:"como vai?", italian:"come stai?", russian:"kak dela?", turkish:
+          +"nasılsınız?", tamil:"eppadi irukeenga?", telugu:"meeru ela unnaru?", bengali:"kemon acho?", dutch:"ho
+          +e gaat het?", swedish:"hur mår du?", polish:"jak się masz?", thai:"sabai dee mai?", vietnamese:"bạn kh
+          +ỏe không?", indonesian:"apa kabar?", malay:"apa khabar?", swahili:"habari yako?", greek:"ti kaneis?",
+          +hebrew:"ma shlomcha?" },
+      302 +      yes: { spanish:"sí", french:"oui", german:"ja", japanese:"hai", hindi:"haan", korean:"ne", chine
+          +se:"shì", arabic:"na'am", portuguese:"sim", italian:"sì", russian:"da", turkish:"evet", tamil:"aam", t
+          +elugu:"avunu", bengali:"hyan", dutch:"ja", swedish:"ja", polish:"tak", thai:"chai", vietnamese:"vâng",
+          + indonesian:"ya", malay:"ya", swahili:"ndiyo", greek:"nai", hebrew:"ken" },
+      303 +      no: { spanish:"no", french:"non", german:"nein", japanese:"iie", hindi:"nahi", korean:"aniyo", c
+          +hinese:"bù", arabic:"la", portuguese:"não", italian:"no", russian:"nyet", turkish:"hayır", tamil:"illa
+          +", telugu:"kadu", bengali:"na", dutch:"nee", swedish:"nej", polish:"nie", thai:"mai", vietnamese:"khôn
+          +g", indonesian:"tidak", malay:"tidak", swahili:"hapana", greek:"ochi", hebrew:"lo" },
+      304 +      please: { spanish:"por favor", french:"s'il vous plaît", german:"bitte", japanese:"onegaishimasu
+          +", hindi:"kripya", korean:"juseyo", chinese:"qǐng", arabic:"min fadlak", portuguese:"por favor", itali
+          +an:"per favore", russian:"pozhaluysta", turkish:"lütfen", tamil:"thayavu seithu", telugu:"dayachesi",
+          +bengali:"onugroho kore", dutch:"alsjeblieft", swedish:"snälla", polish:"proszę", thai:"karuna", vietna
+          +mese:"làm ơn", indonesian:"tolong", malay:"sila", swahili:"tafadhali", greek:"parakalo", hebrew:"bevak
+          +asha" },
+      305 +      "i love you": { spanish:"te amo", french:"je t'aime", german:"ich liebe dich", japanese:"aishite
+          +ru", hindi:"main tumse pyaar karta hoon", korean:"saranghae", chinese:"wǒ ài nǐ", arabic:"ana uhibbuka
+          +", portuguese:"eu te amo", italian:"ti amo", russian:"ya tebya lyublyu", turkish:"seni seviyorum", tam
+          +il:"naan unnai kaadhalikiren", telugu:"nenu ninnu premistunnanu", bengali:"ami tomake bhalobashi", dut
+          +ch:"ik hou van je", swedish:"jag älskar dig", polish:"kocham cię", thai:"chan rak khun", vietnamese:"a
+          +nh yêu em", indonesian:"aku cinta kamu", malay:"saya cinta awak", swahili:"nakupenda", greek:"s'agapo"
+          +, hebrew:"ani ohev otach" },
+      306 +      welcome: { spanish:"bienvenido", french:"bienvenue", german:"willkommen", japanese:"youkoso", hi
+          +ndi:"swagat hai", korean:"hwangyeong", chinese:"huānyíng", arabic:"ahlan wa sahlan", portuguese:"bem-v
+          +indo", italian:"benvenuto", russian:"dobro pozhalovat", turkish:"hoş geldiniz", tamil:"varaverppu", te
+          +lugu:"swagatham", bengali:"swagotom", dutch:"welkom", swedish:"välkommen", polish:"witamy", thai:"yind
+          +ee tonrab", vietnamese:"chào mừng", indonesian:"selamat datang", malay:"selamat datang", swahili:"kari
+          +bu", greek:"kalosirthate", hebrew:"baruch haba" },
+      307 +      "good night": { spanish:"buenas noches", french:"bonne nuit", german:"gute nacht", japanese:"oya
+          +suminasai", hindi:"shubh ratri", korean:"jal jayo", chinese:"wǎn ān", arabic:"layla sa'ida", portugues
+          +e:"boa noite", italian:"buonanotte", russian:"spokoynoy nochi", turkish:"iyi geceler", tamil:"iravu va
+          +nakkam", telugu:"subha ratri", bengali:"shubho ratri", dutch:"goedenacht", swedish:"god natt", polish:
+          +"dobranoc", thai:"ratree sawat", vietnamese:"chúc ngủ ngon", indonesian:"selamat malam", malay:"selama
+          +t malam", swahili:"usiku mwema", greek:"kalinichta", hebrew:"layla tov" },
+      308 +      sorry: { spanish:"lo siento", french:"désolé", german:"es tut mir leid", japanese:"gomen nasai",
+          + hindi:"maaf kijiye", korean:"joesonghamnida", chinese:"duìbùqǐ", arabic:"ana aasif", portuguese:"desc
+          +ulpe", italian:"mi dispiace", russian:"izvinite", turkish:"özür dilerim", tamil:"mannikavum", telugu:"
+          +kshaminchandee", bengali:"dukkhito", dutch:"sorry", swedish:"förlåt", polish:"przepraszam", thai:"khor
+          + thot", vietnamese:"xin lỗi", indonesian:"maaf", malay:"maaf", swahili:"samahani", greek:"signomi", he
+          +brew:"slicha" },
+      309 +      friend: { spanish:"amigo", french:"ami", german:"freund", japanese:"tomodachi", hindi:"dost", ko
+          +rean:"chingu", chinese:"péngyǒu", arabic:"sadiq", portuguese:"amigo", italian:"amico", russian:"drug",
+          + turkish:"arkadaş", tamil:"nanban", telugu:"snehithudu", bengali:"bondhu", dutch:"vriend", swedish:"vä
+          +n", polish:"przyjaciel", thai:"pheuan", vietnamese:"bạn", indonesian:"teman", malay:"kawan", swahili:"
+          +rafiki", greek:"filos", hebrew:"chaver" },
+      310 +      food: { spanish:"comida", french:"nourriture", german:"essen", japanese:"tabemono", hindi:"khana
+          +", korean:"eumsik", chinese:"shíwù", arabic:"ta'am", portuguese:"comida", italian:"cibo", russian:"yed
+          +a", turkish:"yemek", tamil:"unavhu", telugu:"bhojanam", bengali:"khabar", dutch:"eten", swedish:"mat",
+          + polish:"jedzenie", thai:"aahan", vietnamese:"thức ăn", indonesian:"makanan", malay:"makanan", swahili
+          +:"chakula", greek:"fagito", hebrew:"ochel" },
+      311 +      water: { spanish:"agua", french:"eau", german:"wasser", japanese:"mizu", hindi:"paani", korean:"
+          +mul", chinese:"shuǐ", arabic:"maa'", portuguese:"água", italian:"acqua", russian:"voda", turkish:"su",
+          + tamil:"thanneer", telugu:"neellu", bengali:"jol", dutch:"water", swedish:"vatten", polish:"woda", tha
+          +i:"nam", vietnamese:"nước", indonesian:"air", malay:"air", swahili:"maji", greek:"nero", hebrew:"mayim
+          +" },
+      312 +      help: { spanish:"ayuda", french:"aide", german:"hilfe", japanese:"tasukete", hindi:"madad", kore
+          +an:"dowajuseyo", chinese:"bāngzhù", arabic:"musa'ada", portuguese:"ajuda", italian:"aiuto", russian:"p
+          +omoshch", turkish:"yardım", tamil:"udavi", telugu:"sahayam", bengali:"sahajjo", dutch:"hulp", swedish:
+          +"hjälp", polish:"pomoc", thai:"chuay", vietnamese:"giúp đỡ", indonesian:"bantuan", malay:"bantuan", sw
+          +ahili:"msaada", greek:"voithia", hebrew:"ezra" },
+      313      };
+      314      const textLower = args.text.toLowerCase().trim();
+      371 -    const toLang = args.to.toLowerCase();
+      372 -    const translated = dictionary.english[textLower]?.[toLang];
+      315 +    const toLang = args.to.toLowerCase().trim();
+      316 +    const translated = dict[textLower]?.[toLang];
+      317      if (translated) {
+      374 -      return {
+      375 -        original: args.text,
+      376 -        translated,
+      377 -        from: args.from || "English",
+      378 -        to: args.to,
+      379 -      };
+      318 +      return { original: args.text, translated, from: args.from || "English", to: args.to };
+      319      }
+      381 -    return {
+      382 -      original: args.text,
+      383 -      translated: `[${args.to}] ${args.text}`,
+      384 -      from: args.from || "English",
+      385 -      to: args.to,
+      386 -      note: "Simulated translation (phrase not in dictionary)",
+      387 -    };
+      320 +    return { original: args.text, translated: `[${args.to}] ${args.text}`, from: args.from || "English
+          +", to: args.to, note: "Simulated translation (phrase not in dictionary)" };
+      321    }
+      322    if (name === "todo_list") {
+      323      if (args.action === "add") {
+
+● 3) Update the intent detection to accept any language:
+
+● Update(C:/Users/SriniAchuthan/OneDrive/Desktop/Claude/MCP/my-mcp-client/mcp-simulator/src/App.jsx)
+  ⎿  Added 17 lines, removed 3 lines
+      1023      });
+      1024    }
+      1025
+      1026 -  // Detect translator intent
+      1026 +  // Detect translator intent (accepts any language)
+      1027    const translateMatch = text.match(
+      1028 -    /translate\s+['"]?(.+?)['"]?\s+(?:to|in|into)\s+(spanish|french|german|japanese|hindi)/i,
+      1028 +    /translate\s+['"]?(.+?)['"]?\s+(?:to|in|into)\s+(\w+)/i,
+      1029    );
+      1030    if (translateMatch) {
+      1031      toolCalls.push({
+     ...
+      1039      });
+      1040    }
+      1041    const howToSayMatch = text.match(
+      1042 -    /how\s+(?:do\s+you\s+)?say\s+['"]?(.+?)['"]?\s+in\s+(spanish|french|german|japanese|hindi)/i,
+      1042 +    /how\s+(?:do\s+you\s+)?say\s+['"]?(.+?)['"]?\s+in\s+(\w+)/i,
+      1043    );
+      1044    if (howToSayMatch) {
+      1045      toolCalls.push({
+     ...
+      1052        },
+      1053      });
+      1054    }
+      1055 +  const whatIsMatch = text.match(
+      1056 +    /what(?:'s|\s+is)\s+['"]?(.+?)['"]?\s+in\s+(spanish|french|german|japanese|hindi|korean|chinese|a
+           +rabic|portuguese|italian|russian|turkish|tamil|telugu|bengali|dutch|swedish|polish|thai|vietnamese|in
+           +donesian|malay|swahili|greek|hebrew)/i,
+      1057 +  );
+      1058 +  if (whatIsMatch) {
+      1059 +    toolCalls.push({
+      1060 +      type: "tool_use",
+      1061 +      id: `toolu_mock_${++toolIdCounter}`,
+      1062 +      name: "translator",
+      1063 +      input: {
+      1064 +        text: whatIsMatch[1].replace(/['"]+$/, "").trim(),
+      1065 +        to: whatIsMatch[2],
+      1066 +      },
+      1067 +    });
+      1068 +  }
+      1069
+      1070    // Detect todo list intent
+      1071    const addTaskMatch = text.match(
+
+● The app should auto-reload. The translator now supports 25 languages:
+
+  Supported Languages
+
+  ┌────────────┬─────────┬─────────┬────────────┬────────────┐
+  │            │         │         │            │            │
+  ├────────────┼─────────┼─────────┼────────────┼────────────┤
+  │ Spanish    │ French  │ German  │ Japanese   │ Hindi      │
+  ├────────────┼─────────┼─────────┼────────────┼────────────┤
+  │ Korean     │ Chinese │ Arabic  │ Portuguese │ Italian    │
+  ├────────────┼─────────┼─────────┼────────────┼────────────┤
+  │ Russian    │ Turkish │ Tamil   │ Telugu     │ Bengali    │
+  ├────────────┼─────────┼─────────┼────────────┼────────────┤
+  │ Dutch      │ Swedish │ Polish  │ Thai       │ Vietnamese │
+  ├────────────┼─────────┼─────────┼────────────┼────────────┤
+  │ Indonesian │ Malay   │ Swahili │ Greek      │ Hebrew     │
+  └────────────┴─────────┴─────────┴────────────┴────────────┘
+
+  16 Translatable Phrases
+
+  hello, goodbye, thank you, good morning, how are you, yes, no, please, i love you, welcome, good night, sorry, friend,
+   food, water, help
+
+  Try these in the simulator
+
+  - Translate hello to Korean
+  - How do you say thank you in Tamil?
+  - Translate goodbye to Arabic
+  - What's i love you in Japanese?
+  - Translate good morning to Telugu
+  - How do you say sorry in Chinese?
+
+✻ Cogitated for 1m 43s
+
+> make sure all protocols are working properly
+
+● Let me check the full file for any issues.
+
+  Reading 1 file… (ctrl+o to expand)
+
+* Hyperspacing… (1m 16s · ↑ 190 tokens · thinking)
