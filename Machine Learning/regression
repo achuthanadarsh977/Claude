@@ -1,0 +1,794 @@
+    ✻
+    |
+   ▟█▙     Claude Code v2.1.49
+ ▐▛███▜▌   Sonnet 4.6 · Claude Pro
+▝▜█████▛▘  ~\.local\bin
+  ▘▘ ▝▝
+
+> convert "C:\Users\SriniAchuthan\OneDrive\Desktop\ULIP_Portal_Documentation.md" to pdf
+
+● Skill(pdf)
+  ⎿  Initializing…
+  ⎿  Error: Unknown skill: pdf
+
+● Let me check what tools are available for conversion and read the file.
+
+● Bash(pandoc --version 2>/dev/null && echo "pandoc available" || echo "pandoc not found")
+  ⎿  pandoc not found
+
+● Read 1 file (ctrl+o to expand)
+
+● Bash(pip install markdown 2>&1 | tail -5)
+  ⎿  Collecting markdown
+       Downloading markdown-3.10.2-py3-none-any.whl.metadata (5.1 kB)
+     Downloading markdown-3.10.2-py3-none-any.whl (108 kB)
+     … +2 lines (ctrl+o to expand)
+
+● Now let me write a Python script to convert the markdown to PDF using reportlab.
+
+● Read 1 file (ctrl+o to expand)
+
+● Write(C:/Users/SriniAchuthan/OneDrive/Desktop/md_to_pdf.py)
+  ⎿  PreToolUse:Write hook error
+  ⎿  Wrote 213 lines to ..\..\OneDrive\Desktop\md_to_pdf.py
+       1 import re
+       2 from reportlab.lib.pagesizes import A4
+       3 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+       4 from reportlab.lib.units import cm
+       5 from reportlab.lib import colors
+       6 from reportlab.platypus import (
+       7     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+       8     HRFlowable, Preformatted
+       9 )
+      10 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY
+     … +203 lines (ctrl+o to expand)
+  ⎿  PostToolUse:Write hook error
+
+● Read 1 file (ctrl+o to expand)
+
+● The PDF has been created. Let me clean up the temporary script.
+
+● Bash(rm "C:/Users/SriniAchuthan/OneDrive/Desktop/md_to_pdf.py")
+  ⎿  Done
+
+● Done. The PDF has been saved to:
+
+  C:\Users\SriniAchuthan\OneDrive\Desktop\ULIP_Portal_Documentation.pdf
+
+  It includes:
+  - Styled headings (H1/H2/H3) in blue tones
+  - Formatted tables with alternating row colors and a blue header
+  - Bullet points, blockquotes, and code block (the flow diagram)
+  - A horizontal rule between sections
+  - A4 page size with clean margins
+
+✻ Worked for 1m 35s
+
+> according to the pdf what are the steps to access the token
+
+● Based on the document, here are the steps to access the API token:
+
+  1. Visit the Portal — Go to https://goulip.in and click Register/Sign Up.
+  2. Create an Account — Fill in your organization name, official email, contact person name, phone number, and
+  password.
+  3. Submit Your Use Case — Explain what data you need, how you plan to use it, what problem it solves, and your
+  business details.
+  4. Wait for Review and Approval — The ULIP team evaluates your company credentials, use case validity, data
+  compliance, and justification.
+  5. Sign the NDA (Non-Disclosure Agreement) — Mandatory before any API access is granted.
+  6. Receive Test API Access — After signing the NDA, you get test credentials/token to build and test your integration.
+  7. Demonstration and Security Check — Conduct a live demo to the ULIP team; your system undergoes a security check to
+  verify data usage aligns with the approved use case.
+  8. Receive Production API Token — After a successful demo, the Production API token is issued, granting full access to
+   live government logistics data.
+
+  ---
+  In short: There are two tokens issued:
+  - Test API Token — after Step 5 (NDA signing)
+  - Production API Token — after Step 7 (demo + security check)
+
+>  1. Visit the Portal — Go to https://goulip.in and click Register/Sign Up.
+    2. Create an Account — Fill in your organization name, official email, contact person name, phone number, and
+    password.
+    3. Submit Your Use Case — Explain what data you need, how you plan to use it, what problem it solves, and your
+    business details.
+    4. Wait for Review and Approval — The ULIP team evaluates your company credentials, use case validity, data
+    compliance, and justification.
+    5. Sign the NDA (Non-Disclosure Agreement) — Mandatory before any API access is granted.
+    6. Receive Test API Access — After signing the NDA, you get test credentials/token to build and test your
+  integration.
+    7. Demonstration and Security Check — Conduct a live demo to the ULIP team; your system undergoes a security
+  check to
+    verify data usage aligns with the approved use case.
+    8. Receive Production API Token — After a successful demo, the Production API token is issued, granting full
+  access to
+     live government logistics data.
+
+    ---
+    In short: There are two tokens issued:
+    - Test API Token — after Step 5 (NDA signing)
+    - Production API Token — after Step 7 (demo + security check) i want normal documentation
+
+● API Token Access — ULIP Portal
+
+  ---
+  Overview
+
+  To access ULIP APIs, organizations must complete a structured onboarding process. Two levels of API tokens are issued:
+   a Test API Token for development and a Production API Token for live use.
+
+  ---
+  Step 1: Visit the Portal
+
+  Navigate to the ULIP portal at https://goulip.in and click the Register or Sign Up button on the homepage.
+
+  ---
+  Step 2: Create an Account
+
+  Complete the registration form with your organization's details including the official name, email address, authorized
+   contact person, phone number, and a secure password.
+
+  ---
+  Step 3: Submit a Use Case
+
+  Once registered, submit a use case describing the data you require, your intended usage, the problem being solved, and
+   background information about your organization or project.
+
+  ---
+  Step 4: Review and Approval
+
+  The ULIP team will evaluate your submission based on company credentials, relevance of the use case, compliance with
+  data usage policies, and justification for the data requested. A support team will contact you during this stage.
+
+  ---
+  Step 5: Sign the Non-Disclosure Agreement (NDA)
+
+  Upon approval, you are required to sign an NDA. This is mandatory and ensures that government logistics data is not
+  misused.
+
+  ---
+  Step 6: Test API Access
+
+  After the NDA is signed, test API credentials and a token are issued. You may begin building and integrating your
+  application using the test environment.
+
+  ---
+  Step 7: Demonstration and Security Check
+
+  Once integration is complete, conduct a live demonstration to the ULIP team. Your system will undergo a security check
+   to confirm that data usage aligns with the approved use case.
+
+  ---
+  Step 8: Production API Token
+
+  Following a successful demonstration and security clearance, a Production API token is issued. This grants full access
+   to real-time government logistics data for use in your live application.
+
+> save this as a pdf
+
+● Write(C:/Users/SriniAchuthan/OneDrive/Desktop/ulip_token_doc.py)
+  ⎿  PreToolUse:Write hook error
+  ⎿  Wrote 127 lines to ..\..\OneDrive\Desktop\ulip_token_doc.py
+       1 from reportlab.lib.pagesizes import A4
+       2 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+       3 from reportlab.lib.units import cm
+       4 from reportlab.lib import colors
+       5 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
+       6 from reportlab.lib.enums import TA_LEFT
+       7
+       8 OUTPUT_FILE = r"C:\Users\SriniAchuthan\OneDrive\Desktop\ULIP_API_Token_Access.pdf"
+       9
+      10 base = getSampleStyleSheet()
+     … +117 lines (ctrl+o to expand)
+  ⎿  PostToolUse:Write hook error
+
+● Read 1 file (ctrl+o to expand)
+
+● Bash(rm "C:/Users/SriniAchuthan/OneDrive/Desktop/ulip_token_doc.py")
+  ⎿  Done
+
+● Done. The PDF has been saved to:
+
+  C:\Users\SriniAchuthan\OneDrive\Desktop\ULIP_API_Token_Access.pdf
+
+> compare opus vs sonnet vs haiku
+
+● Skill(claude-developer-platform)
+  ⎿  Successfully loaded skill · 4 tools allowed
+  ⎿  Interrupted · What should Claude do instead?
+
+> i want simple comparison opus vs sonnet vs haiku thats all
+
+● Column 1: Model ID
+  Opus 4.6: claude-opus-4-6
+  Sonnet 4.6: claude-sonnet-4-6
+  Haiku 4.5: claude-haiku-4-5
+  ────────────────────────────────────────
+  Column 1: Intelligence
+  Opus 4.6: Highest
+  Sonnet 4.6: Balanced
+  Haiku 4.5: Basic
+  ────────────────────────────────────────
+  Column 1: Speed
+  Opus 4.6: Slowest
+  Sonnet 4.6: Medium
+  Haiku 4.5: Fastest
+  ────────────────────────────────────────
+  Column 1: Input cost
+  Opus 4.6: $5.00 / 1M tokens
+  Sonnet 4.6: $3.00 / 1M tokens
+  Haiku 4.5: $1.00 / 1M tokens
+  ────────────────────────────────────────
+  Column 1: Output cost
+  Opus 4.6: $25.00 / 1M tokens
+  Sonnet 4.6: $15.00 / 1M tokens
+  Haiku 4.5: $5.00 / 1M tokens
+  ────────────────────────────────────────
+  Column 1: Context window
+  Opus 4.6: 200K
+  Sonnet 4.6: 200K (1M beta)
+  Haiku 4.5: 200K
+  ────────────────────────────────────────
+  Column 1: Best for
+  Opus 4.6: Complex reasoning, coding, research
+  Sonnet 4.6: Everyday tasks, chat, summarization
+  Haiku 4.5: Simple tasks, high-volume, low-cost
+
+  When to use which:
+  - Opus — Hard problems, deep analysis, complex code
+  - Sonnet — General-purpose, good balance of cost & quality
+  - Haiku — Fast responses, bulk processing, simple Q&A
+
+> explain simple linear regression and multiple linear regression
+
+● Simple Linear Regression
+
+  Predicts an output using one input variable.
+
+  Formula:
+  y = mx + b
+  - y = predicted value
+  - x = input variable
+  - m = slope (how much y changes per unit of x)
+  - b = intercept (value of y when x = 0)
+
+  Example:
+  Predicting salary based on years of experience.
+
+  ┌────────────────┬────────────┐
+  │ Experience (x) │ Salary (y) │
+  ├────────────────┼────────────┤
+  │ 1 year         │ ₹3 LPA     │
+  ├────────────────┼────────────┤
+  │ 3 years        │ ₹6 LPA     │
+  ├────────────────┼────────────┤
+  │ 5 years        │ ₹9 LPA     │
+  └────────────────┴────────────┘
+
+  The model learns: Salary = 1.5 × Experience + 1.5
+
+  ---
+  Multiple Linear Regression
+
+  Predicts an output using two or more input variables.
+
+  Formula:
+  y = b0 + b1x1 + b2x2 + b3x3 + ...
+  - y = predicted value
+  - x1, x2, x3 = input variables
+  - b1, b2, b3 = coefficients (weight of each variable)
+  - b0 = intercept
+
+  Example:
+  Predicting salary based on experience, age, and skills score.
+
+  Salary = 1.2×Experience + 0.5×Age + 2.0×SkillScore + 0.8
+
+  ---
+  Key Differences
+
+  ┌─────────────────┬────────────────────────────┬─────────────────────────────┐
+  │                 │           Simple           │          Multiple           │
+  ├─────────────────┼────────────────────────────┼─────────────────────────────┤
+  │ Input variables │ 1                          │ 2 or more                   │
+  ├─────────────────┼────────────────────────────┼─────────────────────────────┤
+  │ Formula         │ y = mx + b                 │ y = b0 + b1x1 + b2x2 + ...  │
+  ├─────────────────┼────────────────────────────┼─────────────────────────────┤
+  │ Use case        │ One factor affects outcome │ Many factors affect outcome │
+  ├─────────────────┼────────────────────────────┼─────────────────────────────┤
+  │ Accuracy        │ Lower (less info)          │ Higher (more info)          │
+  ├─────────────────┼────────────────────────────┼─────────────────────────────┤
+  │ Complexity      │ Simple                     │ More complex                │
+  └─────────────────┴────────────────────────────┴─────────────────────────────┘
+
+  ---
+  Core Idea (Both)
+
+  Both try to fit the best straight line through data points by minimizing the error between actual and predicted values
+   — this is called Least Squares Method.
+
+  Error = Actual value − Predicted value
+  Goal  = Minimize the sum of squared errors
+
+> explain polynomial linear regression in short and brief and simple way
+
+● Polynomial Regression
+
+  When data doesn't follow a straight line, we use a curve instead.
+
+  Formula:
+  y = b0 + b1x + b2x² + b3x³ + ...
+
+  Same as linear regression but adds powers of x (x², x³, etc.)
+
+  ---
+  Simple Example
+
+  Predicting plant growth based on water given:
+
+  ┌────────────┬────────────┐
+  │ Water (x)  │ Growth (y) │
+  ├────────────┼────────────┤
+  │ Too little │ Low        │
+  ├────────────┼────────────┤
+  │ Just right │ High       │
+  ├────────────┼────────────┤
+  │ Too much   │ Low again  │
+  └────────────┴────────────┘
+
+  This is a curve, not a straight line — polynomial handles this.
+
+  ---
+  Visual Idea
+
+  Linear:      y /
+                /       straight line
+
+  Polynomial:  y  ∩
+              curves up then down
+
+  ---
+  Key Points
+
+  ┌────────────┬────────────────┬────────────────────────┐
+  │            │     Linear     │       Polynomial       │
+  ├────────────┼────────────────┼────────────────────────┤
+  │ Line shape │ Straight       │ Curved                 │
+  ├────────────┼────────────────┼────────────────────────┤
+  │ Formula    │ y = mx + b     │ y = b0 + b1x + b2x²... │
+  ├────────────┼────────────────┼────────────────────────┤
+  │ Use when   │ Data is linear │ Data curves            │
+  ├────────────┼────────────────┼────────────────────────┤
+  │ Degree     │ 1              │ 2, 3, 4...             │
+  └────────────┴────────────────┴────────────────────────┘
+
+  ---
+  Degree Meaning
+
+  - Degree 2 → one curve (U shape)
+  - Degree 3 → two curves (S shape)
+  - Higher degree → more curves, risk of overfitting
+
+  Overfitting = model fits training data too perfectly but fails on new data. Keep degree as low as possible.
+
+
+> how to calculate accuracy in ml python explain with example
+
+● Accuracy in Machine Learning
+
+  Accuracy = how often the model predicts correctly.
+
+  Formula:
+  Accuracy = (Correct Predictions / Total Predictions) × 100
+
+  ---
+  Simple Example — Classifying Emails (Spam or Not)
+
+  from sklearn.datasets import make_classification
+  from sklearn.model_selection import train_test_split
+  from sklearn.linear_model import LogisticRegression
+  from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+  # 1. Create sample data
+  X, y = make_classification(n_samples=1000, n_features=5, random_state=42)
+
+  # 2. Split into train and test
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+  # 3. Train the model
+  model = LogisticRegression()
+  model.fit(X_train, y_train)
+
+  # 4. Predict
+  y_pred = model.predict(X_test)
+
+  # 5. Calculate Accuracy
+  accuracy = accuracy_score(y_test, y_pred)
+  print(f"Accuracy: {accuracy * 100:.2f}%")
+
+  Output:
+  Accuracy: 92.00%
+
+  ---
+  Confusion Matrix
+
+  Shows where the model went right and wrong.
+
+  cm = confusion_matrix(y_test, y_pred)
+  print(cm)
+
+  Output:
+  [[93  7]
+   [ 9 91]]
+
+                    Predicted
+                    No    Yes
+  Actual  No    [  93     7  ]   → 7 wrong (False Positive)
+          Yes   [   9    91  ]   → 9 wrong (False Negative)
+
+  ---
+  Classification Report
+
+  print(classification_report(y_test, y_pred))
+
+  Output:
+                precision    recall  f1-score   support
+
+             0       0.91      0.93      0.92       100
+             1       0.93      0.91      0.92       100
+
+      accuracy                           0.92       200
+
+  ---
+  What Each Metric Means
+
+  ┌───────────┬─────────────────────────────────────────┬───────────────────────┐
+  │  Metric   │                 Meaning                 │        Formula        │
+  ├───────────┼─────────────────────────────────────────┼───────────────────────┤
+  │ Accuracy  │ Overall correct predictions             │ Correct / Total       │
+  ├───────────┼─────────────────────────────────────────┼───────────────────────┤
+  │ Precision │ Of predicted Yes, how many actually Yes │ TP / (TP + FP)        │
+  ├───────────┼─────────────────────────────────────────┼───────────────────────┤
+  │ Recall    │ Of actual Yes, how many predicted Yes   │ TP / (TP + FN)        │
+  ├───────────┼─────────────────────────────────────────┼───────────────────────┤
+  │ F1-Score  │ Balance of Precision & Recall           │ 2 × (P × R) / (P + R) │
+  └───────────┴─────────────────────────────────────────┴───────────────────────┘
+
+  ---
+  When Accuracy is NOT Enough
+
+  Dataset: 950 Not Spam, 50 Spam
+
+  Model predicts everything as "Not Spam"
+  Accuracy = 950/1000 = 95%  ← looks good but model is useless!
+
+  Use F1-Score or Recall when data is imbalanced.
+
+  ---
+  Quick Summary
+
+  ✔ Balanced data     → Use Accuracy
+  ✔ Imbalanced data   → Use F1-Score / Recall
+  ✔ Always check      → Confusion Matrix
+
+> i am getting error NameError                                 Traceback (most recent call last)
+  Cell In[23], line 13
+        9 y = data3.iloc[:,-1].values
+       11 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+  ---> 13 model = LogisticRegression()
+       14 model.fit(X_train,y_train)
+       16 y_pred = model.predict(X_test)
+
+  NameError: name 'LogisticRegression' is not defined
+
+● Fix — Missing Import
+
+  You forgot to import LogisticRegression. Add this at the top of your notebook:
+
+  from sklearn.linear_model import LogisticRegression
+
+  ---
+  Your Fixed Code
+
+  from sklearn.model_selection import train_test_split
+  from sklearn.linear_model import LogisticRegression          # ← add this
+  from sklearn.metrics import accuracy_score
+
+  X = data3.iloc[:, :-1].values
+  y = data3.iloc[:, -1].values
+
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+  model = LogisticRegression()
+  model.fit(X_train, y_train)
+
+  y_pred = model.predict(X_test)
+
+  print(f"Accuracy: {accuracy_score(y_test, y_pred) * 100:.2f}%")
+
+  ---
+  Common Import Mistakes
+
+  ┌────────────────────────────────────┬──────────────────────────────────────────────────────┐
+  │               Error                │                    Missing Import                    │
+  ├────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ LogisticRegression not defined     │ from sklearn.linear_model import LogisticRegression  │
+  ├────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ train_test_split not defined       │ from sklearn.model_selection import train_test_split │
+  ├────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ accuracy_score not defined         │ from sklearn.metrics import accuracy_score           │
+  ├────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ LinearRegression not defined       │ from sklearn.linear_model import LinearRegression    │
+  ├────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ RandomForestClassifier not defined │ from sklearn.ensemble import RandomForestClassifier  │
+  └────────────────────────────────────┴──────────────────────────────────────────────────────┘
+
+  Tip: Always put all imports in the first cell of your notebook so they run before anything else.
+
+
+> i am getting error from sklearn.datasets import make_classification
+  from sklearn.model_selection import train_test_split
+  from sklearn.linear_model import LogisticRegression
+  from sklearn.metrics import accuracy_score , confusion_matrix , classification_report
+
+
+  data3 = pd.read_csv(r'C:\Users\SriniAchuthan\OneDrive\Documents\Machine-Learning-A-Z-Codes-Datasets\Machine
+  Learning A-Z\Part 2 - Regression\Section 6 - Polynomial Regression\Python\Position_Salaries.csv')
+
+  X = data3.iloc[:,:-1].values
+  y = data3.iloc[:,-1].values
+
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+
+  model = LogisticRegression()
+  model.fit(X_train,y_train)
+
+  y_pred = model.predict(X_test)
+  accuracy =  accuracy_score(y_test,y_pred)
+  print(f"Accuracy:{accuracy*100:2f}%")
+
+● The Problem
+
+  The Position_Salaries.csv is a regression dataset (predicts salary = continuous numbers), but LogisticRegression is
+  for classification (predicts categories like 0 or 1).
+
+  This will throw:
+  ValueError: Unknown label type: 'continuous'
+
+  ---
+  What Your Dataset Looks Like
+
+  ┌──────────┬───────┬────────┐
+  │ Position │ Level │ Salary │
+  ├──────────┼───────┼────────┤
+  │ Junior   │ 1     │ 45000  │
+  ├──────────┼───────┼────────┤
+  │ Senior   │ 5     │ 110000 │
+  ├──────────┼───────┼────────┤
+  │ Manager  │ 8     │ 300000 │
+  └──────────┴───────┴────────┘
+
+  Salary is a number, not a category — so use Linear/Polynomial Regression.
+
+  ---
+  Fixed Code
+
+  import pandas as pd
+  from sklearn.model_selection import train_test_split
+  from sklearn.linear_model import LinearRegression
+  from sklearn.metrics import r2_score, mean_squared_error
+
+  data3 = pd.read_csv(r'C:\Users\SriniAchuthan\OneDrive\Documents\Machine-Learning-A-Z-Codes-Datasets\Machine Learning
+  A-Z\Part 2 - Regression\Section 6 - Polynomial Regression\Python\Position_Salaries.csv')
+
+  X = data3.iloc[:, 1:2].values   # Level column only (skip Position text)
+  y = data3.iloc[:, -1].values    # Salary
+
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+  model = LinearRegression()
+  model.fit(X_train, y_train)
+
+  y_pred = model.predict(X_test)
+
+  print(f"R² Score : {r2_score(y_test, y_pred) * 100:.2f}%")
+  print(f"Predicted: {y_pred}")
+  print(f"Actual   : {y_test}")
+
+  ---
+  Accuracy vs R² Score
+
+  ┌──────────────┬────────────────────┬───────────────────┐
+  │              │   Classification   │    Regression     │
+  ├──────────────┼────────────────────┼───────────────────┤
+  │ Problem type │ Categories (0/1)   │ Numbers           │
+  ├──────────────┼────────────────────┼───────────────────┤
+  │ Metric       │ accuracy_score     │ r2_score          │
+  ├──────────────┼────────────────────┼───────────────────┤
+  │ Algorithm    │ LogisticRegression │ LinearRegression  │
+  ├──────────────┼────────────────────┼───────────────────┤
+  │ Example      │ Spam/Not Spam      │ Salary prediction │
+  └──────────────┴────────────────────┴───────────────────┘
+
+  ---
+  R² Score Meaning
+
+  R² = 1.0  → Perfect prediction  (100%)
+  R² = 0.8  → 80% variance explained (good)
+  R² = 0.0  → Model is useless
+  R² < 0    → Worse than a flat line
+
+  Rule: Use accuracy_score for classification. Use r2_score for regression.
+
+
+> explain all the regression techniques in one simple line
+
+● Regression Techniques — One Line Each
+
+  ┌─────┬──────────────────────┬────────────────────────────────────────────────────────────┐
+  │  #  │      Technique       │                          One Line                          │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 1   │ Simple Linear        │ One input → straight line → predict output                 │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 2   │ Multiple Linear      │ Many inputs → straight line → predict output               │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 3   │ Polynomial           │ One input → curved line → predict output                   │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 4   │ Ridge (L2)           │ Linear regression + penalty to shrink large coefficients   │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 5   │ Lasso (L1)           │ Linear regression + penalty that removes useless features  │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 6   │ Elastic Net          │ Mix of Ridge and Lasso penalties together                  │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 7   │ Decision Tree        │ Split data into branches based on conditions → predict     │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 8   │ Random Forest        │ Many decision trees combined → average their predictions   │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 9   │ SVR (Support Vector) │ Fit best line within an allowed error margin               │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 10  │ KNN Regression       │ Predict based on average of K nearest neighbors            │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 11  │ Gradient Boosting    │ Build trees one by one, each fixing previous tree's errors │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 12  │ XGBoost              │ Faster and better version of Gradient Boosting             │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 13  │ Bayesian             │ Predict using probability and prior knowledge              │
+  ├─────┼──────────────────────┼────────────────────────────────────────────────────────────┤
+  │ 14  │ Logistic             │ Predicts probability of a category (0 or 1), not a number  │
+  └─────┴──────────────────────┴────────────────────────────────────────────────────────────┘
+
+  ---
+  Quick Group Summary
+
+  📈 Line-based     → Simple, Multiple, Polynomial
+  🔒 Regularized    → Ridge, Lasso, Elastic Net
+  🌳 Tree-based     → Decision Tree, Random Forest, XGBoost, Gradient Boosting
+  📐 Other          → SVR, KNN, Bayesian, Logistic
+
+> save "C:\Users\SriniAchuthan\OneDrive\Desktop\Python\.ipynb_checkpoints\Machine2-checkpoint.ipynb"
+  "C:\Users\SriniAchuthan\OneDrive\Desktop\Python\.ipynb_checkpoints\Machine-checkpoint.ipynb" and
+  "C:\Users\SriniAchuthan\OneDrive\Desktop\Python\.ipynb_checkpoints\Machine2-checkpoint.ipynb"
+  in https://github.com/achuthanadarsh977/Python under the subfolder machine learning
+
+● Bash(gh auth status 2>&1)
+  ⎿  github.com
+       ✓ Logged in to github.com account achuthanadarsh977 (keyring)
+       - Active account: true
+     … +3 lines (ctrl+o to expand)
+
+● Read 1 file (ctrl+o to expand)
+
+● Bash(gh repo view achuthanadarsh977/Python 2>&1)
+  ⎿  name:      achuthanadarsh977/Python
+     description:
+
+● Bash(git clone https://github.com/achuthanadarsh977/Python.git "C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo"
+      2>&1)
+  ⎿  Cloning into 'C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo'...
+
+● Read 1 file (ctrl+o to expand)
+
+● Bash(mkdir -p "C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo/machine learning" && cp
+      "C:/Users/SriniAchuthan/OneDrive/Desktop/Python/.ipynb_checkpoints/Machine…)
+  ⎿  Done
+
+● Bash(cd "C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo" && git add "machine learning/Machine.ipynb" "machine
+      learning/Machine2.ipynb" && git status)
+  ⎿  warning: in the working copy of 'machine learning/Machine.ipynb', LF will be replaced by CRLF the next time Gi
+     t touches it
+     warning: in the working copy of 'machine learning/Machine2.ipynb', LF will be replaced by CRLF the next time G
+     … +8 lines (ctrl+o to expand)
+  ⎿  Shell cwd was reset to C:\Users\SriniAchuthan\.local\bin
+
+● Bash(cd "C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo" && git commit -m "Add machine learning notebooks…)
+  ⎿  [Neetcode 35ab271] Add machine learning notebooks
+      2 files changed, 12 insertions(+)
+      create mode 100644 machine learning/Machine.ipynb
+      create mode 100644 machine learning/Machine2.ipynb
+  ⎿  Shell cwd was reset to C:\Users\SriniAchuthan\.local\bin
+
+● Bash(cd "C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo" && git push 2>&1)
+  ⎿  To https://github.com/achuthanadarsh977/Python.git
+        c29a053..35ab271  Neetcode -> Neetcode
+  ⎿  Shell cwd was reset to C:\Users\SriniAchuthan\.local\bin
+
+● Bash(rm -rf "C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo")
+  ⎿  Done
+
+● Done. Both notebooks have been pushed to your GitHub repo.
+
+  Uploaded to: https://github.com/achuthanadarsh977/Python/tree/Neetcode/machine learning
+
+  ┌───────────────────────────┬─────────────────────────────────┐
+  │           File            │            Saved As             │
+  ├───────────────────────────┼─────────────────────────────────┤
+  │ Machine-checkpoint.ipynb  │ machine learning/Machine.ipynb  │
+  ├───────────────────────────┼─────────────────────────────────┤
+  │ Machine2-checkpoint.ipynb │ machine learning/Machine2.ipynb │
+  └───────────────────────────┴─────────────────────────────────┘
+
+  Note: Files were saved under the Neetcode branch (the repo's active branch). The checkpoint suffix was removed for
+  cleaner filenames.
+
+
+✻ Cooked for 1m 1s
+
+> convert the fipynb files in .py files and save them in github link
+  https://github.com/achuthanadarsh977/Python/tree/Neetcode/machine learning
+
+● Bash(jupyter nbconvert --version 2>&1)
+  ⎿  7.16.6
+
+● Bash(jupyter nbconvert --to script
+      "C:/Users/SriniAchuthan/OneDrive/Desktop/Python/.ipynb_checkpoints/Machine-checkpoint.ipynb" --output
+      "C:/Users/SriniAchuthan/OneD…)
+  ⎿  [NbConvertApp] Converting notebook C:/Users/SriniAchuthan/OneDrive/Desktop/Python/.ipynb_checkpoints/Machine-c
+     heckpoint.ipynb to script
+     [NbConvertApp] Writing 0 bytes to C:\Users\SriniAchuthan\OneDrive\Desktop\Machine.txt
+     … +3 lines (ctrl+o to expand)
+
+● Read 2 files (ctrl+o to expand)
+
+● The checkpoint files were empty. The actual notebooks are Machine.ipynb and Machine2.ipynb. Converting those instead.
+
+● Bash(jupyter nbconvert --to script "C:/Users/SriniAchuthan/OneDrive/Desktop/Python/Machine.ipynb" --output
+      "C:/Users/SriniAchuthan/OneDrive/Desktop/Machine" 2>&1 &&…)
+  ⎿  [NbConvertApp] Converting notebook C:/Users/SriniAchuthan/OneDrive/Desktop/Python/Machine.ipynb to script
+     [NbConvertApp] Writing 2141 bytes to C:\Users\SriniAchuthan\OneDrive\Desktop\Machine.py
+     [NbConvertApp] Converting notebook C:/Users/SriniAchuthan/OneDrive/Desktop/Python/Machine2.ipynb to script
+     [NbConvertApp] Writing 3164 bytes to C:\Users\SriniAchuthan\OneDrive\Desktop\Machine2.py
+
+● Bash(git clone https://github.com/achuthanadarsh977/Python.git "C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo"
+      2>&1)
+  ⎿  Cloning into 'C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo'...
+
+● Bash(cp "C:/Users/SriniAchuthan/OneDrive/Desktop/Machine.py"
+      "C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo/machine learning/Machine.py" && cp "C:/Users/SriniA…)
+  ⎿  Machine.ipynb
+     Machine.py
+     Machine2.ipynb
+     Machine2.py
+
+● Bash(cd "C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo" && git add "machine learning/Machine.py" "machine
+      learning/Machine2.py" && git commit -m "Convert Machi…)
+  ⎿  [Neetcode 498216d] Convert Machine.ipynb and Machine2.ipynb to Python scripts
+      2 files changed, 255 insertions(+)
+      create mode 100644 machine learning/Machine.py
+     … +3 lines (ctrl+o to expand)
+  ⎿  Shell cwd was reset to C:\Users\SriniAchuthan\.local\bin
+
+● Bash(rm -rf "C:/Users/SriniAchuthan/OneDrive/Desktop/Python_repo" && rm
+      "C:/Users/SriniAchuthan/OneDrive/Desktop/Machine.py" "C:/Users/SriniAchuthan/OneDrive/Desktop…)
+  ⎿  cleanup done
+
+● Done. Both .py files have been pushed to GitHub.
+
+  Location: https://github.com/achuthanadarsh977/Python/tree/Neetcode/machine learning
+
+  ┌──────────────────────────────┬────────┐
+  │             File             │ Status │
+  ├──────────────────────────────┼────────┤
+  │ Machine.ipynb → Machine.py   │ Pushed │
+  ├──────────────────────────────┼────────┤
+  │ Machine2.ipynb → Machine2.py │ Pushed │
+  └──────────────────────────────┴────────┘
