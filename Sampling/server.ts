@@ -10,17 +10,23 @@ server.tool(
   async ({ text_to_summarize }) => {
     const prompt = `Please summarize the following text:\n${text_to_summarize}`;
 
-    const result = await server.server.createMessage({
-      messages: [{ role: "user", content: { type: "text", text: prompt } }],
-      maxTokens: 4000,
-      systemPrompt: "You are a helpful research assistant.",
-    });
+    let result;
+    try {
+      result = await server.server.createMessage({
+        messages: [{ role: "user", content: { type: "text", text: prompt } }],
+        maxTokens: 4000,
+        systemPrompt: "You are a helpful research assistant.",
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`createMessage failed: ${msg}`);
+    }
 
     if (result.content.type === "text") {
       return { content: [{ type: "text", text: result.content.text }] };
     }
 
-    throw new Error("Sampling failed");
+    throw new Error(`Sampling returned unexpected content type: ${result.content.type}`);
   }
 );
 

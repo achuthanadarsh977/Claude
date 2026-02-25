@@ -14,10 +14,15 @@ const client = new Client(
 
 // Ollama sampling handler — runs fully locally, no API key needed
 client.setRequestHandler(CreateMessageRequestSchema, async (request) => {
-  const messages = request.params.messages.map((m) => ({
-    role: m.role,
-    content: m.content.type === "text" ? m.content.text : "",
-  }));
+  const messages = request.params.messages.map((m) => {
+    if (m.content.type !== "text") {
+      console.warn(`Unsupported content type "${m.content.type}" — skipping`);
+    }
+    return {
+      role: m.role,
+      content: m.content.type === "text" ? m.content.text : "",
+    };
+  });
 
   const response = await fetch("http://localhost:11434/api/chat", {
     method: "POST",
@@ -29,7 +34,14 @@ client.setRequestHandler(CreateMessageRequestSchema, async (request) => {
     }),
   });
 
-  const data = (await response.json()) as { message: { content: string } };
+  if (!response.ok) {
+    throw new Error(`Ollama error: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json() as { message?: { content?: string } };
+  if (!data.message?.content) {
+    throw new Error("Ollama returned an unexpected response structure");
+  }
   const text = data.message.content;
 
   return {

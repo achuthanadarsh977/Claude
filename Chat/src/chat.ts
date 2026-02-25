@@ -34,7 +34,10 @@ async function sendMessage(message: string): Promise<void> {
   }
 
   const json = await res.json();
-  const text = json.choices?.[0]?.message?.content || "[No response]";
+  const text: string = json.choices?.[0]?.message?.content;
+  if (!text) {
+    throw new Error(`Unexpected API response structure: ${JSON.stringify(json)}`);
+  }
   process.stdout.write(text);
   history.push({ role: "assistant", content: text });
 }
@@ -48,32 +51,31 @@ console.log("\n  Chat started! (Free, no API key needed)");
 console.log("  Powered by Pollinations AI");
 console.log('  Type your message and press Enter. Type "exit" to end.\n');
 
-function prompt(): void {
-  rl.question("You: ", async (input: string) => {
-    const trimmed = input.trim();
+process.on("SIGINT", () => {
+  console.log("\n  Goodbye!\n");
+  rl.close();
+  process.exit(0);
+});
 
-    if (!trimmed) {
-      prompt();
-      return;
-    }
+for await (const input of rl) {
+  const trimmed = input.trim();
 
-    if (trimmed.toLowerCase() === "exit" || trimmed.toLowerCase() === "quit") {
-      console.log("\n  Goodbye!\n");
-      rl.close();
-      process.exit(0);
-    }
+  if (!trimmed) continue;
 
-    try {
-      process.stdout.write("\nAI: ");
-      await sendMessage(trimmed);
-      console.log("\n");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`\n  Error: ${msg}\n`);
-    }
+  if (trimmed.toLowerCase() === "exit" || trimmed.toLowerCase() === "quit") {
+    console.log("\n  Goodbye!\n");
+    rl.close();
+    break;
+  }
 
-    prompt();
-  });
+  try {
+    process.stdout.write("\nAI: ");
+    await sendMessage(trimmed);
+    console.log("\n");
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`\n  Error: ${msg}\n`);
+  }
+
+  process.stdout.write("You: ");
 }
-
-prompt();
