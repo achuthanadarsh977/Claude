@@ -1,0 +1,21 @@
+{
+  "name": "notifications",
+  "version": "0.1.0",
+  "description": "Demonstration of notifications with MCP",
+  "type": "module",
+  "scripts": {
+    "start:server": "tsx server.ts",
+    "start:client": "tsx client.ts",
+    "build": "tsc",
+    "start": "node dist/client.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
